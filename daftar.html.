@@ -31,9 +31,9 @@
 
     <label>Tipe Kamar:</label>
     <select name="Tipe Kamar" required>
-      <option value="Standard">Standard - Rp 800.000</option>
-      <option value="AC">AC + KM Dalam - Rp 1.100.000</option>
-      <option value="VIP">VIP - Rp 1.500.000</option>
+      <option value="Standard">Standard - Rp 1000.000</option>
+      <option value="AC">AC + KM Dalam - Rp 1.500.000</option>
+      <option value="VIP">VIP - Rp 2.500.000</option>
     </select>
 
     <input type="text" name="Durasi Sewa" placeholder="Durasi Sewa: 6 bulan / 1 tahun">
