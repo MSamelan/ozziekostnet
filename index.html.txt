@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OZZIEKOST - Kost Nyaman di Yogyakarta</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin:0; color:#333; }
+    header { background:#0d6efd; color:white; padding:15px 50px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; }
+    header a { color:white; text-decoration:none; margin:0 10px; font-weight:500; }
+    .hero { background:linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2') center/cover; color:white; text-align:center; padding:120px 20px; }
+    .hero h1 { font-size:48px; margin:0; }
+    .btn { background:#ffc107; color:#000; padding:12px 25px; border-radius:8px; text-decoration:none; font-weight:bold; margin:10px; display:inline-block; }
+    .btn-outline { background:transparent; border:2px solid white; color:white; }
+    .section { padding:60px 50px; text-align:center; }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:25px; margin-top:30px; }
+    .card { border:1px solid #ddd; padding:25px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    footer { background:#222; color:white; text-align:center; padding:30px; }
+    .wa-btn { position:fixed; bottom:20px; right:20px; background:#25D366; color:white; padding:15px 20px; border-radius:50px; text-decoration:none; font-weight:bold; box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+    @media(max-width:768px){ .grid{grid-template-columns:1fr;} header{padding:15px 20px;} }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>OZZIEKOST</h2>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="daftar.html">Daftar</a>
+    <a href="dashboard.html">Login</a>
+    <a href="#kontak">Kontak</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Selamat Datang di OZZIEKOST</h1>
+  <p>Kost Nyaman, Aman & Terpisah di Yogyakarta. Dekat UGM, UNY, UII</p>
+  <a href="daftar.html" class="btn">Daftar Penyewa Baru</a>
+  <a href="#rumah" class="btn btn-outline">Lihat Rumah Kami</a>
+</section>
+
+<section class="section">
+  <h2>Tentang OZZIEKOST</h2>
+  <p>OZZIEKOST punya 3 rumah kost di Yogyakarta. 1 khusus Putra & 2 khusus Putri. 
+  Lingkungan aman, ada Ibu Kost, dan fasilitas lengkap. Cocok untuk mahasiswa.</p>
+</section>
+
+<section class="section" id="rumah" style="background:#f8f9fa;">
+  <h2>Rumah Kost Kami</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>🏠 Yogya Ozzie 1 - PUTRA</h3>
+      <p>Kapasitas: 8 Kamar</p>
+      <p>Fasilitas: WiFi, AC, Dapur</p>
+      <p><b>Khusus Mahasiswa Putra</b></p>
+    </div>
+    <div class="card">
+      <h3>🏠 Yogya Ozzie 2 - PUTRI</h3>
+      <p>Kapasitas: 10 Kamar</p>
+      <p>Fasilitas: WiFi, AC, KM Dalam, Ibu Kost</p>
+      <p><b>Khusus Mahasiswa Putri</b></p>
+    </div>
+    <div class="card">
+      <h3>🏠 Yogya Ozzie 3 - PUTRI</h3>
+      <p>Kapasitas: 12 Kamar</p>
+      <p>Fasilitas: WiFi, AC, Laundry, Parkir Luas</p>
+      <p><b>Khusus Mahasiswa Putri</b></p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Tipe Kamar & Harga</h2>
+  <div class="grid">
+    <div class="card"><h3>Kamar Standard</h3><p>Rp 800.000 / bulan</p><p>Kasur, Lemari, Meja</p></div>
+    <div class="card"><h3>Kamar AC</h3><p>Rp 1.100.000 / bulan</p><p>+ Kamar Mandi Dalam</p></div>
+    <div class="card"><h3>Kamar VIP</h3><p>Rp 1.500.000 / bulan</p><p>+ Kulkas & TV</p></div>
+  </div>
+</section>
+
+<footer id="kontak">
+  <h3>Hubungi Kami</h3>
+  <p>📍 Yogyakarta, Indonesia</p>
+  <p>📞 WhatsApp Admin: +61458042399</p>
+  <p>📧 ozziekost@gmail.com</p>
+  <p>© 2026 OZZIEKOST. All rights reserved.</p>
+</footer>
+
+<a href="https://wa.me/61458042399" class="wa-btn" target="_blank">Chat via WhatsApp</a>
+
+</body>
+</html>
