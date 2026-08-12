@@ -18,18 +18,23 @@ h1{color:#0d6efd;}
 <p><b>Tagihan Bulan Ini:</b> Rp 2.000.000</p>
   <p><b>Jatuh Tempo:</b> 25 Agustus 2026</p>
   <br>
-  <a href="login.html" class="btn">Logout</a>
+  <button onclick="logout()" class="btn">Logout</button>
 </div>
 
 <script>
-  // Ambil nama user dari URL ?user=A01
   const params = new URLSearchParams(window.location.search);
   const user = params.get('user');
-  
-if(user) {
-  document.getElementById('judul').innerText = 'Dashboard Penghuni ' + user;
-  document.getElementById('kodeKamar').innerText = user; // <-- TAMBAH INI
-}
+  if(user) {
+    document.getElementById('judul').innerText = 'Dashboard Penghuni ' + user;
+    document.getElementById('kodeKamar').innerText = user;
+  } else {
+    // kalau buka dashboard langsung tanpa login, lempar ke login
+    window.location.href = 'login.html';
+  }
+
+  function logout() {
+    window.location.href = 'login.html';
+  }
 </script>
 </body>
 </html>
