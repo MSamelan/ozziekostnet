@@ -12,9 +12,10 @@ h1{color:#0d6efd;}
 </head>
 <body>
 <div class="box">
-  <h1 id="judul">Dashboard Penghuni</h1>
-  <p>Selamat datang di OZZIEKOST!</p>
-  <p><b>Tagihan Bulan Ini:</b> Rp 2.000.000</p>
+  <h1 id="judul">Dashboard Penghunik/h1>
+<p style="text-align:center;">Kode Kamar: <span id="kodeKamar">-</span></p>
+<p>Selamat datang di OZZIEKOST</p>
+<p><b>Tagihan Bulan Ini:</b> Rp 2.000.000</p>
   <p><b>Jatuh Tempo:</b> 25 Agustus 2026</p>
   <br>
   <a href="login.html" class="btn">Logout</a>
@@ -25,9 +26,10 @@ h1{color:#0d6efd;}
   const params = new URLSearchParams(window.location.search);
   const user = params.get('user');
   
-  if(user) {
-    document.getElementById('judul').innerText = 'Dashboard Penghuni ' + user;
-  }
+if(user) {
+  document.getElementById('judul').innerText = 'Dashboard Penghuni ' + user;
+  document.getElementById('kodeKamar').innerText = user; // <-- TAMBAH INI
+}
 </script>
 </body>
 </html>
