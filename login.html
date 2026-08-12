@@ -39,18 +39,16 @@
 </div>
 
 <script>
-function loginDummy(){
-  let user = document.getElementById('username').value;
-  let pass = document.getElementById('password').value;
-  
-  // Ini contoh login dummy. Nanti kita ganti pake database beneran
-  if(user == "A01" && pass == "123456"){
-    alert("Login Berhasil! Selamat datang di Dashboard Penghuni");
-    window.location.href = "dashboard.html"; // nanti kita bikin
+function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  if(username === 'A01' && password === '123456') {
+    alert('Login Berhasil! Selamat datang di Dashboard Penghuni');
+    window.location.href = 'dashboard.html'; // <-- ini yg bikin pindah halaman
   } else {
-    alert("Username atau Password salah. Hubungi admin jika lupa.");
+    alert('Username atau Password salah!');
   }
-  return false; // biar gak reload
 }
 </script>
 
