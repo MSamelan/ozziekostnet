@@ -44,11 +44,11 @@ function login() {
   const password = document.getElementById('password').value;
   const error = document.getElementById('error');
 
-  const users = {
-    "OKPA101": "123456",
-    "OKPA102": "123456", 
-    "OKPA103": "123456"
-  };
+ const users = {
+  "OZASTD101": "123456", // Putra Std Unit1 K01 - 2jt
+  "OZASUP102": "123456", // Putra Sup Unit1 K02 - 2.5jt
+  "OZIDLX201": "123456"  // Putri DLX Unit2 K01 - 3.5jt
+};
 
   if(users[username] && users[username] === password) {
     window.location.href = 'dashboard.html?user=' + username;
