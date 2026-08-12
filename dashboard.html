@@ -15,7 +15,7 @@ h1{color:#0d6efd;}
   <h1 id="judul">Dashboard Penghuni</h1>
 <p style="text-align:center;">Kode Kamar: <span id="kodeKamar">-</span></p>
 <p>Selamat datang di OZZIEKOST</p>
-<p><b>Tagihan Bulan Ini:</b> Rp 2.000.000</p>
+<p><b>Tagihan Bulan Ini:</b> <span id="tagihan">Rp 2.000.000</span></p>
   <p><b>Jatuh Tempo:</b> 25 Agustus 2026</p>
   <br>
   <button onclick="logout()" class="btn">Logout</button>
@@ -24,11 +24,26 @@ h1{color:#0d6efd;}
 <script>
   const params = new URLSearchParams(window.location.search);
   const user = params.get('user');
+
   if(user) {
     document.getElementById('judul').innerText = 'Dashboard Penghuni ' + user;
-    document.getElementById('kodeKamar').innerText = user;
+
+    const jenisKelamin = user.charAt(2) === 'A' ? 'Putra' : 'Putri';
+    const tipeKode = user.substring(3, 6);
+    const unit = user.charAt(6);
+    const noKamar = user.substring(7, 9);
+
+    let tipe = '';
+    let tagihan = '';
+
+    if(tipeKode === 'STD') { tipe = 'Standard'; tagihan = 'Rp 2.000.000'; }
+    else if(tipeKode === 'SUP') { tipe = 'Superior'; tagihan = 'Rp 2.500.000'; }
+    else if(tipeKode === 'DLX') { tipe = 'Delux'; tagihan = 'Rp 3.500.000'; }
+
+    document.getElementById('kodeKamar').innerHTML = `${user} - ${jenisKelamin} ${tipe} Unit ${unit} No ${noKamar}`;
+    document.getElementById('tagihan').innerText = tagihan;
+
   } else {
-    // kalau buka dashboard langsung tanpa login, lempar ke login
     window.location.href = 'login.html';
   }
 
