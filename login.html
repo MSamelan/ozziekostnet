@@ -23,16 +23,16 @@
   <h2>Login Ozziekost Residen</h2>
   <p>Khusus OZZIEKOST Residen yang sudah ACC</p>
   
-  <form onsubmit="return loginDummy()">
+  <form onsubmit="return false">
     <input type="text" id="username" placeholder="Username / No Kamar" required>
     <input type="password" id="password" placeholder="Password" required>
-    <button type="submit">Masuk</button>
+    <button type="button" onclick="login()">Masuk</button>
   </form>
 
   <div class="notice">
     ⚠️ Lupa password? Chat Admin via WhatsApp: +628xxx xxx xxx
   </div>
-
+<p id="error" style="display:none; color:red; text-align:center; margin-top:10px;">Username/Password salah</p>
   <div class="back">
     <a href="index.html">← Kembali ke Home</a>
   </div>
