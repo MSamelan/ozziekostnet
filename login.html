@@ -40,82 +40,39 @@
 
 <script>
 function login() {
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
+  const username = document.getElementById('username').value.toUpperCase().trim(); // auto jadi BESAR + hapus spasi
+  const password = document.getElementById('password').value.trim();
   const error = document.getElementById('error');
+  error.style.display = 'none'; // sembunyiin error dulu
 
- const users = {
-  // UNIT 1 - PUTRA - 20 KAMAR
-  "OZASTD101": "123456", // Std K01 - 2jt
-  "OZASTD102": "123456", // Std K02 - 2jt
-  "OZASTD103": "123456", // Std K03 - 2jt
-  "OZASTD104": "123456", // Std K04 - 2jt
-  "OZASTD105": "123456", // Std K05 - 2jt
-  "OZASTD106": "123456", // Std K06 - 2jt
-  "OZASTD107": "123456", // Std K07 - 2jt
-  "OZASTD108": "123456", // Std K08 - 2jt
-  "OZASUP109": "123456", // Sup K09 - 2.5jt
-  "OZASUP110": "123456", // Sup K10 - 2.5jt
-  "OZASUP111": "123456", // Sup K11 - 2.5jt
-  "OZASUP112": "123456", // Sup K12 - 2.5jt
-  "OZASUP113": "123456", // Sup K13 - 2.5jt
-  "OZASUP114": "123456", // Sup K14 - 2.5jt
-  "OZASUP115": "123456", // Sup K15 - 2.5jt
-  "OZASUP116": "123456", // Sup K16 - 2.5jt
-  "OZADLX117": "123456", // DLX K17 - 3.5jt
-  "OZADLX118": "123456", // DLX K18 - 3.5jt
-  "OZADLX119": "123456", // DLX K19 - 3.5jt
-  "OZADLX120": "123456", // DLX K20 - 3.5jt <-- UDAH DIKASIH KOMA
+  const users = {
+    // UNIT 1 - PUTRA - 20 KAMAR
+    "OZASTD101": "123456", "OZASTD102": "123456", "OZASTD103": "123456", "OZASTD104": "123456",
+    "OZASTD105": "123456", "OZASTD106": "123456", "OZASTD107": "123456", "OZASTD108": "123456",
+    "OZASUP109": "123456", "OZASUP110": "123456", "OZASUP111": "123456", "OZASUP112": "123456",
+    "OZASUP113": "123456", "OZASUP114": "123456", "OZASUP115": "123456", "OZASUP116": "123456",
+    "OZADLX117": "123456", "OZADLX118": "123456", "OZADLX119": "123456", "OZADLX120": "123456",
 
-  // UNIT 2 - PUTRI - 20 KAMAR
-  "OZISTD201": "123456", // Std K01 - 2jt
-  "OZISTD202": "123456", // Std K02 - 2jt
-  "OZISTD203": "123456", // Std K03 - 2jt
-  "OZISTD204": "123456", // Std K04 - 2jt
-  "OZISTD205": "123456", // Std K05 - 2jt
-  "OZISTD206": "123456", // Std K06 - 2jt
-  "OZISTD207": "123456", // Std K07 - 2jt
-  "OZISTD208": "123456", // Std K08 - 2jt
-  "OZISUP209": "123456", // Sup K09 - 2.5jt
-  "OZISUP210": "123456", // Sup K10 - 2.5jt
-  "OZISUP211": "123456", // Sup K11 - 2.5jt
-  "OZISUP212": "123456", // Sup K12 - 2.5jt
-  "OZISUP213": "123456", // Sup K13 - 2.5jt
-  "OZISUP214": "123456", // Sup K14 - 2.5jt
-  "OZISUP215": "123456", // Sup K15 - 2.5jt
-  "OZISUP216": "123456", // Sup K16 - 2.5jt
-  "OZIDLX217": "123456", // DLX K17 - 3.5jt
-  "OZIDLX218": "123456", // DLX K18 - 3.5jt
-  "OZIDLX219": "123456", // DLX K19 - 3.5jt
-  "OZIDLX220": "123456", // DLX K20 - 3.5jt <-- UDAH DIKASIH KOMA
+    // UNIT 2 - PUTRI - 20 KAMAR
+    "OZISTD201": "123456", "OZISTD202": "123456", "OZISTD203": "123456", "OZISTD204": "123456",
+    "OZISTD205": "123456", "OZISTD206": "123456", "OZISTD207": "123456", "OZISTD208": "123456",
+    "OZISUP209": "123456", "OZISUP210": "123456", "OZISUP211": "123456", "OZISUP212": "123456",
+    "OZISUP213": "123456", "OZISUP214": "123456", "OZISUP215": "123456", "OZISUP216": "123456",
+    "OZIDLX217": "123456", "OZIDLX218": "123456", "OZIDLX219": "123456", "OZIDLX220": "123456",
 
-  // UNIT 3 - PUTRI - 20 KAMAR
-  "OZISTD301": "123456", // Std K01 - 2jt
-  "OZISTD302": "123456", // Std K02 - 2jt
-  "OZISTD303": "123456", // Std K03 - 2jt
-  "OZISTD304": "123456", // Std K04 - 2jt
-  "OZISTD305": "123456", // Std K05 - 2jt
-  "OZISTD306": "123456", // Std K06 - 2jt
-  "OZISTD307": "123456", // Std K07 - 2jt
-  "OZISTD308": "123456", // Std K08 - 2jt
-  "OZISUP309": "123456", // Sup K09 - 2.5jt
-  "OZISUP310": "123456", // Sup K10 - 2.5jt
-  "OZISUP311": "123456", // Sup K11 - 2.5jt
-  "OZISUP312": "123456", // Sup K12 - 2.5jt
-  "OZISUP313": "123456", // Sup K13 - 2.5jt
-  "OZISUP314": "123456", // Sup K14 - 2.5jt
-  "OZISUP315": "123456", // Sup K15 - 2.5jt
-  "OZISUP316": "123456", // Sup K16 - 2.5jt
-  "OZIDLX317": "123456", // DLX K17 - 3.5jt
-  "OZIDLX318": "123456", // DLX K18 - 3.5jt
-  "OZIDLX319": "123456", // DLX K19 - 3.5jt
-  "OZIDLX320": "123456" // DLX K20 - 3.5jt
-};
+    // UNIT 3 - PUTRI - 20 KAMAR
+    "OZISTD301": "123456", "OZISTD302": "123456", "OZISTD303": "123456", "OZISTD304": "123456",
+    "OZISTD305": "123456", "OZISTD306": "123456", "OZISTD307": "123456", "OZISTD308": "123456",
+    "OZISUP309": "123456", "OZISUP310": "123456", "OZISUP311": "123456", "OZISUP312": "123456",
+    "OZISUP313": "123456", "OZISUP314": "123456", "OZISUP315": "123456", "OZISUP316": "123456",
+    "OZIDLX317": "123456", "OZIDLX318": "123456", "OZIDLX319": "123456", "OZIDLX320": "123456"
+  };
 
   if(users[username] && users[username] === password) {
     window.location.href = 'dashboard.html?user=' + username;
   } else {
     error.style.display = 'block';
+    error.innerText = 'Username: ' + username + ' tidak ditemukan atau Password salah';
   }
 }
 </script>
