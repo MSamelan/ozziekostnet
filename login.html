@@ -42,15 +42,20 @@
 function login() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
+  const error = document.getElementById('error');
 
-  if(username === 'A01' && password === '123456') {
-    alert('Login Berhasil! Selamat datang di Dashboard Penghuni');
-    window.location.href = 'dashboard.html'; // <-- ini yg bikin pindah halaman
+  const users = {
+    "OKPA101": "123456",
+    "OKPA102": "123456", 
+    "OKPA103": "123456"
+  };
+
+  if(users[username] && users[username] === password) {
+    window.location.href = 'dashboard.html?user=' + username;
   } else {
-    alert('Username atau Password salah!');
+    error.style.display = 'block';
   }
 }
 </script>
-
 </body>
 </html>
