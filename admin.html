@@ -127,7 +127,11 @@
     hitungKeuangan();
     tampilkanTabel(dataPenghuni);
   
-  function logout(){
+  ffunction logout(){
+    localStorage.removeItem('userLogin'); // hapus sesi login
+    alert("Logout Berhasil!");
+    window.location.href = "/ozziekostnet/login.html"; // <-- TAMBAH /ozziekostnet/
+}unction logout(){
     localStorage.removeItem('userLogin'); // hapus sesi login
     alert("Logout Berhasil!");
     window.location.href = "login.html"; // balik ke login
