@@ -1,92 +1,103 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OZZIEKOST - Kost Nyaman di Yogyakarta</title>
-  <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; margin:0; color:#333; }
-    header { background:#0d6efd; color:white; padding:15px 50px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; }
-    header a { color:white; text-decoration:none; margin:0 10px; font-weight:500; }
-    .hero { background:linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2') center/cover; color:white; text-align:center; padding:120px 20px; }
-    .hero h1 { font-size:48px; margin:0; }
-    .btn { background:#ffc107; color:#000; padding:12px 25px; border-radius:8px; text-decoration:none; font-weight:bold; margin:10px; display:inline-block; }
-    .btn-outline { background:transparent; border:2px solid white; color:white; }
-    .section { padding:60px 50px; text-align:center; }
-    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:25px; margin-top:30px; }
-    .card { border:1px solid #ddd; padding:25px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
-    footer { background:#222; color:white; text-align:center; padding:30px; }
-    .wa-btn { position:fixed; bottom:20px; right:20px; background:#25D366; color:white; padding:15px 20px; border-radius:50px; text-decoration:none; font-weight:bold; box-shadow:0 4px 10px rgba(0,0,0,0.2); }
-    @media(max-width:768px){ .grid{grid-template-columns:1fr;} header{padding:15px 20px;} }
-  </style>
+<meta charset="UTF-8">
+<title>Dashboard Admin - OZZIEKOST</title>
+<!-- TAMBAHIN INI BUAT GRAFIK -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body { font-family: Arial; background: #f4f6f9; margin: 0; padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .header h1 { color: #007bff; }
+    .btn-logout { background: #dc3545; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; }
+    
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .card h3 { margin: 0; color: #555; font-size: 14px; }
+    .card p { font-size: 24px; font-weight: bold; margin: 10px 0 0 0; }
+
+    /* CARD GRAFIK BARU */
+    .chart-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+
+    .table-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+    .status-lunas { color: green; font-weight: bold; }
+    .status-belum { color: red; font-weight: bold; }
+</style>
 </head>
 <body>
 
-<header>
-  <h2>OZZIEKOST</h2>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="daftar.html">Daftar</a>
-    <a href="dashboard.html">Login</a>
-    <a href="#kontak">Kontak</a>
-  </nav>
-</header>
+<div class="header">
+    <h1>Dashboard Admin OZZIEKOST</h1>
+    <a href="login.html" class="btn-logout">Logout</a>
+</div>
 
-<section class="hero">
-  <h1>Selamat Datang di OZZIEKOST</h1>
-  <p>Kost Nyaman, Aman & Terpisah di Yogyakarta. Dekat UGM, UNY, UII</p>
-  <a href="daftar.html" class="btn">Daftar Penyewa Baru</a>
-  <a href="#rumah" class="btn btn-outline">Lihat Rumah Kami</a>
-</section>
-
-<section class="section">
-  <h2>Tentang OZZIEKOST</h2>
-  <p>OZZIEKOST punya 3 rumah kost di Yogyakarta. 1 khusus Putra & 2 khusus Putri. 
-  Lingkungan aman, ada Ibu Kost, dan fasilitas lengkap. Cocok untuk mahasiswa.</p>
-</section>
-
-<section class="section" id="rumah" style="background:#f8f9fa;">
-  <h2>Rumah Kost Kami</h2>
-  <div class="grid">
+<!-- 3 KARTU STATISTIK -->
+<div class="stats">
     <div class="card">
-      <h3>🏠 Yogya Ozzie 1 - PUTRA</h3>
-      <p>Kapasitas: 8 Kamar</p>
-      <p>Fasilitas: WiFi, AC, Dapur</p>
-      <p><b>Khusus Mahasiswa Putra</b></p>
+        <h3>Pemasukan Bulan Ini</h3>
+        <p>Rp 24.000.000</p>
     </div>
     <div class="card">
-      <h3>🏠 Yogya Ozzie 2 - PUTRI</h3>
-      <p>Kapasitas: 10 Kamar</p>
-      <p>Fasilitas: WiFi, AC, KM Dalam, Ibu Kost</p>
-      <p><b>Khusus Mahasiswa Putri</b></p>
+        <h3>Pemasukan YTD</h3>
+        <p>Rp 180.000.000</p>
     </div>
     <div class="card">
-      <h3>🏠 Yogya Ozzie 3 - PUTRI</h3>
-      <p>Kapasitas: 12 Kamar</p>
-      <p>Fasilitas: WiFi, AC, Laundry, Parkir Luas</p>
-      <p><b>Khusus Mahasiswa Putri</b></p>
+        <h3>Jatuh Tempo</h3>
+        <p>5 Penghuni</p>
     </div>
-  </div>
-</section>
+</div>
 
-<section class="section">
-  <h2>Tipe Kamar & Harga</h2>
-  <div class="grid">
-    <div class="card"><h3>Kamar Standard</h3><p>Rp2000.000 / bulan</p><p> Kasur, Lemari, Meja</p></div>
-    <div class="card"><h3>Kamar Superior</h3><p>Rp 2.500.000 / bulan</p><p>+ Kamar Mandi Dalam</p></div>
-    <div class="card"><h3>Kamar Delux</h3><p>Rp 3.500.000 / bulan</p><p>+ Kulkas & TV</p></div>
-  </div>
-</section>
+<!-- CARD GRAFIK BARU -->
+<div class="chart-card">
+    <h3>Grafik Pemasukan 6 Bulan Terakhir</h3>
+    <canvas id="grafikPemasukan"></canvas>
+</div>
 
-<footer id="kontak">
-  <h3>Hubungi Kami</h3>
-  <p>📍 Yogyakarta, Indonesia</p>
-  <p>📞 WhatsApp Admin: +62852-xxxx-xxxx</p>
-  <p>📧 ozziekost@gmail.com</p>
-  <p>© 2026 OZZIEKOST. All rights reserved.</p>
-</footer>
+<!-- TABEL PENGHUNI -->
+<div class="table-box">
+    <h3>Data Penghuni</h3>
+    <table>
+        <tr><th>Nama</th><th>Kamar</th><th>Status</th></tr>
+        <tr><td>Budi</td><td>A1</td><td class="status-lunas">Lunas</td></tr>
+        <tr><td>Ani</td><td>B2</td><td class="status-belum">Belum</td></tr>
+    </table>
+</div>
 
-<a href="https://wa.me/61458042399" class="wa-btn" target="_blank">Chat via WhatsApp</a>
+<!-- SCRIPT GRAFIK -->
+<script>
+const ctx = document.getElementById('grafikPemasukan');
+
+new Chart(ctx, {
+    type: 'bar', // bisa ganti 'line' kalau mau grafik garis
+    data: {
+        labels: ['Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus'],
+        datasets: [{
+            label: 'Pemasukan Rp',
+            data: [22000000, 24000000, 21000000, 25000000, 23000000, 24000000],
+            backgroundColor: '#007bff',
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                ticks: {
+                    callback: function(value) {
+                        return 'Rp ' + value.toLocaleString('id-ID');
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
 
 </body>
 </html>
