@@ -34,9 +34,13 @@
   </div>
   
 <script>
-if(!localStorage.getItem('userLogin')){
+<script>
+// Cek login HANYA untuk halaman admin
+if(window.location.pathname.includes("admin.html") && !localStorage.getItem('userLogin')){
     window.location.href = "login.html";
 }  
+
+const dataPenghuni = [
 
 const dataPenghuni = [
   {user: "BUDI01", unit: 1, tipe: "Standar", harga: 800000},
