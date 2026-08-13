@@ -62,6 +62,10 @@
   </div>
   
     <script>
+    // Cek login, kalau ga ada lempar ke login
+if(!localStorage.getItem('userLogin')){
+    window.location.href = "login.html";
+}  
     // Data sewa: tiap tgl 25 jatuh tempo
     const TANGGAL_JATUH_TEMPO = 25; 
 
