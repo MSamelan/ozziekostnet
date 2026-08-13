@@ -6,17 +6,19 @@
   <title>Login OZZIEKOST + MFA + PIN Recovery</title>
   <style>
     body { font-family: Arial; background: #007bff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px 0; }
- .login-box { background: white; padding: 35px; border-radius: 15px; width: 400px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
- .login-box h2 { color: #007bff; margin-bottom: 20px; }
- .login-box input,.login-box select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
- .login-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; font-size: 16px; }
- .login-box button:hover { opacity: 0.9; }
- .step { display: none; }
- .step.active { display: block; }
- .hint { font-size: 12px; color: #666; margin-top: 10px; }
- .link { color: #007bff; cursor: pointer; text-decoration: underline; font-size: 14px; }
- .btn-green { background: #28a745; }
- .btn-gray { background: #6c757d; }
+.login-box { background: white; padding: 35px; border-radius: 15px; width: 400px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+.login-box h2 { color: #007bff; margin-bottom: 20px; }
+.login-box input,.login-box select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+.login-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; font-size: 16px; }
+.login-box button:hover { opacity: 0.9; }
+.step { display: none; }
+.step.active { display: block; }
+.hint { font-size: 12px; color: #666; margin-top: 10px; }
+.link { color: #007bff; cursor: pointer; text-decoration: underline; font-size: 14px; }
+.btn-green { background: #28a745; }
+.btn-gray { background: #6c757d; }
+.password-wrapper { position: relative; }
+.toggle-pass { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; user-select: none; }
   </style>
 </head>
 <body>
@@ -31,7 +33,10 @@
         <option value="resident">Resident</option>
       </select>
       <input type="text" id="username" placeholder="Username">
-      <input type="password" id="password" placeholder="Password">
+      <div class="password-wrapper">
+        <input type="password" id="password" placeholder="Password">
+        <span class="toggle-pass" onclick="togglePassword('password')">👁️</span>
+      </div>
       <button onclick="loginStep1()">Login</button>
       <p class="hint"><span class="link" onclick="showRegister()">Daftar Akun Baru</span> | <span class="link" onclick="showForgotPin()">Lupa PIN?</span></p>
     </div>
@@ -40,7 +45,10 @@
     <div id="step2" class="step">
       <p><b>Verifikasi 2 Langkah</b><br>1. Cek Alert untuk kode OTP <br> 2. Masukkan OTP + PIN 6 angka kamu</p>
       <input type="text" id="otpInput" placeholder="Masukkan 6 digit OTP dari Alert" maxlength="6">
-      <input type="password" id="pinInput" placeholder="Masukkan PIN 6 angka kamu" maxlength="6">
+      <div class="password-wrapper">
+        <input type="password" id="pinInput" placeholder="Masukkan PIN 6 angka kamu" maxlength="6">
+        <span class="toggle-pass" onclick="togglePassword('pinInput')">👁️</span>
+      </div>
       <button onclick="verifikasiMFA()">Verifikasi & Masuk</button>
       <p class="hint"><span class="link" onclick="backToLogin()">Kembali ke Login</span></p>
     </div>
@@ -53,9 +61,15 @@
         <option value="admin">Admin</option>
       </select>
       <input type="text" id="regUser" placeholder="Buat Username">
-      <input type="password" id="regPass" placeholder="Buat Password">
+      <div class="password-wrapper">
+        <input type="password" id="regPass" placeholder="Buat Password">
+        <span class="toggle-pass" onclick="togglePassword('regPass')">👁️</span>
+      </div>
       <input type="text" id="regDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
-      <input type="password" id="regPin" placeholder="Buat PIN 6 Angka" maxlength="6">
+      <div class="password-wrapper">
+        <input type="password" id="regPin" placeholder="Buat PIN 6 Angka" maxlength="6">
+        <span class="toggle-pass" onclick="togglePassword('regPin')">👁️</span>
+      </div>
       <button class="btn-green" onclick="daftarAkun()">Simpan Akun</button>
       <button class="btn-gray" onclick="backToLogin()">Kembali</button>
     </div>
@@ -69,9 +83,15 @@
         <option value="admin">Admin</option>
       </select>
       <input type="text" id="forgotUser" placeholder="Username">
-      <input type="password" id="forgotPass" placeholder="Password Lama">
+      <div class="password-wrapper">
+        <input type="password" id="forgotPass" placeholder="Password Lama">
+        <span class="toggle-pass" onclick="togglePassword('forgotPass')">👁️</span>
+      </div>
       <input type="text" id="forgotDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
-      <input type="password" id="newPin" placeholder="Buat PIN 6 Angka Baru" maxlength="6">
+      <div class="password-wrapper">
+        <input type="password" id="newPin" placeholder="Buat PIN 6 Angka Baru" maxlength="6">
+        <span class="toggle-pass" onclick="togglePassword('newPin')">👁️</span>
+      </div>
       <button class="btn-green" onclick="resetPin()">Reset PIN</button>
       <button class="btn-gray" onclick="backToLogin()">Kembali</button>
     </div>
@@ -94,6 +114,16 @@ function getAllUsers(){
 
 function saveUsers(users){
     localStorage.setItem('ozzieUsers', JSON.stringify(users));
+}
+
+// TOGGLE LIHAT PASSWORD
+function togglePassword(id){
+    const input = document.getElementById(id);
+    if(input.type === "password"){
+        input.type = "text";
+    } else {
+        input.type = "password";
+    }
 }
 
 // VALIDASI FORMAT DD-MM-YYYY
