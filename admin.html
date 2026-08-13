@@ -90,7 +90,7 @@
         document.getElementById('pemasukanBulan').innerText = 'Rp ' + pemasukanBulan.toLocaleString('id-ID');
         document.getElementById('pemasukanTahun').innerText = 'Rp ' + pemasukanTahun.toLocaleString('id-ID');
     }
-
+  
     function tampilkanTabel(data) {
       const tbody = document.getElementById('bodyTabel');
       tbody.innerHTML = '';
@@ -114,7 +114,7 @@
       });
       document.getElementById('total').innerText = `Total: ${data.length} Penghuni`;
     }
-
+  
     function filterTable() {
       const search = document.getElementById('search').value.toUpperCase();
       const unit = document.getElementById('filterUnit').value;
@@ -125,10 +125,14 @@
       
       tampilkanTabel(filtered);
     }
-    function logout(){ localStorage.clear(); window.location='login.html'; }
-
     hitungKeuangan();
     tampilkanTabel(dataPenghuni);
+  
+  function logout(){
+    localStorage.removeItem('userLogin'); // hapus sesi login
+    alert("Logout Berhasil!");
+    window.location.href = "login.html"; // balik ke login
+}
     </script>
 </body>
 </html>
