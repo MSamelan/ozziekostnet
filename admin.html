@@ -16,9 +16,25 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <button class="logout" onclick="window.location='login.html'">Logout</button>
+ <div class="container">
+    <button class="logout" onclick="logout()">Logout</button>
     <h1>Dashboard Admin OZZIEKOST</h1>
+
+    <!-- BOX RINGKASAN KEUANGAN -->
+    <div style="display: flex; gap: 15px; margin: 20px 0; flex-wrap: wrap;">
+        <div style="flex:1; background:#e7f3ff; padding:15px; border-radius:10px; border-left:5px solid #007bff;">
+            <h4>Pemasukan Bulan Ini</h4>
+            <h2 id="pemasukanBulan">Rp 0</h2>
+        </div>
+        <div style="flex:1; background:#e8ffe7; padding:15px; border-radius:10px; border-left:5px solid #28a745;">
+            <h4>Total Pemasukan YTD 2026</h4>
+            <h2 id="pemasukanTahun">Rp 0</h2>
+        </div>
+        <div style="flex:1; background:#fff3e7; padding:15px; border-radius:10px; border-left:5px solid #fd7e14;">
+            <h4>Tagihan Jatuh Tempo</h4>
+            <h2 id="jatuhTempo">25 Agustus 2026</h2>
+        </div>
+    </div>
     
     <input type="text" id="search" placeholder="Cari Username..." onkeyup="filterTable()">
     <select id="filterUnit" onchange="filterTable()">
@@ -36,8 +52,9 @@
           <th>Username</th>
           <th>Unit</th>
           <th>Tipe Kamar</th>
-          <th>Harga</th>
-          <th>Status Bayar</th>
+   <th>Harga</th>
+<th>Next Due Date</th>
+<th>Status Bayar</th>
         </tr>
       </thead>
       <tbody id="bodyTabel"></tbody>
@@ -45,76 +62,73 @@
   </div>
 
 <script>
-const dataPenghuni = [
-  // UNIT 1 - PUTRA
-  {user: "OZASTD101", unit: 1, tipe: "Standard", harga: 2000000}, {user: "OZASTD102", unit: 1, tipe: "Standard", harga: 2000000},
-  {user: "OZASTD103", unit: 1, tipe: "Standard", harga: 2000000}, {user: "OZASTD104", unit: 1, tipe: "Standard", harga: 2000000},
-  {user: "OZASTD105", unit: 1, tipe: "Standard", harga: 2000000}, {user: "OZASTD106", unit: 1, tipe: "Standard", harga: 2000000},
-  {user: "OZASTD107", unit: 1, tipe: "Standard", harga: 2000000}, {user: "OZASTD108", unit: 1, tipe: "Standard", harga: 2000000},
-  {user: "OZASUP109", unit: 1, tipe: "Superior", harga: 2500000}, {user: "OZASUP110", unit: 1, tipe: "Superior", harga: 2500000},
-  {user: "OZASUP111", unit: 1, tipe: "Superior", harga: 2500000}, {user: "OZASUP112", unit: 1, tipe: "Superior", harga: 2500000},
-  {user: "OZASUP113", unit: 1, tipe: "Superior", harga: 2500000}, {user: "OZASUP114", unit: 1, tipe: "Superior", harga: 2500000},
-  {user: "OZASUP115", unit: 1, tipe: "Superior", harga: 2500000}, {user: "OZASUP116", unit: 1, tipe: "Superior", harga: 2500000},
-  {user: "OZADLX117", unit: 1, tipe: "Deluxe", harga: 3500000}, {user: "OZADLX118", unit: 1, tipe: "Deluxe", harga: 3500000},
-  {user: "OZADLX119", unit: 1, tipe: "Deluxe", harga: 3500000}, {user: "OZADLX120", unit: 1, tipe: "Deluxe", harga: 3500000},
-  
-  // UNIT 2 - PUTRI
-  {user: "OZISTD201", unit: 2, tipe: "Standard", harga: 2000000}, {user: "OZISTD202", unit: 2, tipe: "Standard", harga: 2000000},
-  {user: "OZISTD203", unit: 2, tipe: "Standard", harga: 2000000}, {user: "OZISTD204", unit: 2, tipe: "Standard", harga: 2000000},
-  {user: "OZISTD205", unit: 2, tipe: "Standard", harga: 2000000}, {user: "OZISTD206", unit: 2, tipe: "Standard", harga: 2000000},
-  {user: "OZISTD207", unit: 2, tipe: "Standard", harga: 2000000}, {user: "OZISTD208", unit: 2, tipe: "Standard", harga: 2000000},
-  {user: "OZISUP209", unit: 2, tipe: "Superior", harga: 2500000}, {user: "OZISUP210", unit: 2, tipe: "Superior", harga: 2500000},
-  {user: "OZISUP211", unit: 2, tipe: "Superior", harga: 2500000}, {user: "OZISUP212", unit: 2, tipe: "Superior", harga: 2500000},
-  {user: "OZISUP213", unit: 2, tipe: "Superior", harga: 2500000}, {user: "OZISUP214", unit: 2, tipe: "Superior", harga: 2500000},
-  {user: "OZISUP215", unit: 2, tipe: "Superior", harga: 2500000}, {user: "OZISUP216", unit: 2, tipe: "Superior", harga: 2500000},
-  {user: "OZIDLX217", unit: 2, tipe: "Deluxe", harga: 3500000}, {user: "OZIDLX218", unit: 2, tipe: "Deluxe", harga: 3500000},
-  {user: "OZIDLX219", unit: 2, tipe: "Deluxe", harga: 3500000}, {user: "OZIDLX220", unit: 2, tipe: "Deluxe", harga: 3500000},
+    <script>
+    // Data sewa: tiap tgl 25 jatuh tempo
+    const TANGGAL_JATUH_TEMPO = 25; 
 
-  // UNIT 3 - PUTRI
-  {user: "OZISTD301", unit: 3, tipe: "Standard", harga: 2000000}, {user: "OZISTD302", unit: 3, tipe: "Standard", harga: 2000000},
-  {user: "OZISTD303", unit: 3, tipe: "Standard", harga: 2000000}, {user: "OZISTD304", unit: 3, tipe: "Standard", harga: 2000000},
-  {user: "OZISTD305", unit: 3, tipe: "Standard", harga: 2000000}, {user: "OZISTD306", unit: 3, tipe: "Standard", harga: 2000000},
-  {user: "OZISTD307", unit: 3, tipe: "Standard", harga: 2000000}, {user: "OZISTD308", unit: 3, tipe: "Standard", harga: 2000000},
-  {user: "OZISUP309", unit: 3, tipe: "Superior", harga: 2500000}, {user: "OZISUP310", unit: 3, tipe: "Superior", harga: 2500000},
-  {user: "OZISUP311", unit: 3, tipe: "Superior", harga: 2500000}, {user: "OZISUP312", unit: 3, tipe: "Superior", harga: 2500000},
-  {user: "OZISUP313", unit: 3, tipe: "Superior", harga: 2500000}, {user: "OZISUP314", unit: 3, tipe: "Superior", harga: 2500000},
-  {user: "OZISUP315", unit: 3, tipe: "Superior", harga: 2500000}, {user: "OZISUP316", unit: 3, tipe: "Superior", harga: 2500000},
-  {user: "OZIDLX317", unit: 3, tipe: "Deluxe", harga: 3500000}, {user: "OZIDLX318", unit: 3, tipe: "Deluxe", harga: 3500000},
-  {user: "OZIDLX319", unit: 3, tipe: "Deluxe", harga: 3500000}, {user: "OZIDLX320", unit: 3, tipe: "Deluxe", harga: 3500000}
-];
+    const dataPenghuni = [
+      // ... BIARKAN DATA 60 PENGHUNI KAMU YG LAMA DI SINI JANGAN DIHAPUS ...
+    ];
 
-function tampilkanTabel(data) {
-  const tbody = document.getElementById('bodyTabel');
-  tbody.innerHTML = '';
-  data.forEach((p, i) => {
-    const status = Math.random() > 0.5 ? 'Lunas' : 'Belum Bayar'; // sementara random
-    const classStatus = status === 'Lunas' ? 'lunas' : 'belum';
-    tbody.innerHTML += `
-      <tr>
-        <td>${i+1}</td>
-        <td>${p.user}</td>
-        <td>Unit ${p.unit}</td>
-        <td>${p.tipe}</td>
-        <td>Rp ${p.harga.toLocaleString('id-ID')}</td>
-        <td class="${classStatus}">${status}</td>
-      </tr>
-    `;
-  });
-  document.getElementById('total').innerText = `Total: ${data.length} Penghuni`;
-}
+    function cekStatusBayar(user) {
+        // Sementara random. Nanti ganti ambil dari localStorage
+        return Math.random() > 0.4; 
+    }
 
-function filterTable() {
-  const search = document.getElementById('search').value.toUpperCase();
-  const unit = document.getElementById('filterUnit').value;
-  let filtered = dataPenghuni;
-  
-  if(unit !== 'all') filtered = filtered.filter(p => p.unit == unit);
-  if(search) filtered = filtered.filter(p => p.user.includes(search));
-  
-  tampilkanTabel(filtered);
-}
+    function hitungKeuangan() {
+        let pemasukanBulan = 0;
+        let pemasukanTahun = 0;
+        const bulanSekarang = new Date().getMonth() + 1; // 1-12
+        
+        dataPenghuni.forEach(p => {
+            if(cekStatusBayar(p.user)){
+                pemasukanBulan += p.harga;
+                pemasukanTahun += p.harga * bulanSekarang; // YTD = harga x jumlah bulan
+            }
+        });
 
-tampilkanTabel(dataPenghuni);
-</script>
+        document.getElementById('pemasukanBulan').innerText = 'Rp ' + pemasukanBulan.toLocaleString('id-ID');
+        document.getElementById('pemasukanTahun').innerText = 'Rp ' + pemasukanTahun.toLocaleString('id-ID');
+    }
+
+    function tampilkanTabel(data) {
+      const tbody = document.getElementById('bodyTabel');
+      tbody.innerHTML = '';
+      data.forEach((p, i) => {
+        const lunas = cekStatusBayar(p.user);
+        const status = lunas ? 'Lunas' : 'Belum Bayar';
+        const bulanIni = new Date().toLocaleString('id-ID', {month: 'long'});
+        const nextDue = `25 ${bulanIni} 2026`; 
+        const classStatus = lunas ? 'lunas' : 'belum';
+        tbody.innerHTML += `
+          <tr>
+            <td>${i+1}</td>
+            <td>${p.user}</td>
+            <td>Unit ${p.unit}</td>
+            <td>${p.tipe}</td>
+            <td>Rp ${p.harga.toLocaleString('id-ID')}</td>
+            <td>${nextDue}</td>
+            <td class="${classStatus}">${status}</td>
+          </tr>
+        `;
+      });
+      document.getElementById('total').innerText = `Total: ${data.length} Penghuni`;
+    }
+
+    function filterTable() {
+      const search = document.getElementById('search').value.toUpperCase();
+      const unit = document.getElementById('filterUnit').value;
+      let filtered = dataPenghuni;
+      
+      if(unit !== 'all') filtered = filtered.filter(p => p.unit == unit);
+      if(search) filtered = filtered.filter(p => p.user.includes(search));
+      
+      tampilkanTabel(filtered);
+    }
+    function logout(){ localStorage.clear(); window.location='login.html'; }
+
+    hitungKeuangan();
+    tampilkanTabel(dataPenghuni);
+    </script>
 </body>
 </html>
