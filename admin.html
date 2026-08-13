@@ -35,9 +35,10 @@
   
 <script>
 // Cek login HANYA untuk halaman admin
-if(window.location.pathname.includes("admin.html") && !localStorage.getItem('userLogin')){
-    window.location.href = "admin-login.html";
-}  
+if(localStorage.getItem('userLogin')!== 'admin'){
+    alert("Akses khusus Admin!");
+    window.location.href = "login.html";
+}
 
 // HARGA UDAH DISERAGAMKAN SAMA HOMEPAGE
 const dataPenghuni = [
