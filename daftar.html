@@ -1,47 +1,72 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Daftar Penyewa - OZZIEKOST</title>
-  <style>
-    body { font-family: Arial; background:#f8f9fa; padding:40px; }
-    .form-box { background:white; max-width:600px; margin:auto; padding:40px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
-    input, select, textarea { width:100%; padding:12px; margin:10px 0; border:1px solid #ccc; border-radius:8px; }
-    button { background:#0d6efd; color:white; padding:15px; border:none; border-radius:8px; width:100%; font-size:16px; font-weight:bold; cursor:pointer; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Penyewa Baru - OZZIEKOST</title>
+<style>
+    body { font-family: Arial; background: #f4f6f9; margin: 0; padding: 20px; }
+    .header { 
+        background: white; 
+        padding: 15px 30px; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .header h1 { color: #007bff; margin: 0; font-size: 20px; }
+    .btn-kembali { 
+        background: #6c757d; 
+        color: white; 
+        padding: 10px 20px; 
+        border-radius: 8px; 
+        text-decoration: none; 
+        font-weight: bold;
+    }
+    .btn-kembali:hover { background: #5a6268; }
+    .form-box { background: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .form-box h2 { margin-top: 0; }
+    .form-box input, .form-box select, .form-box textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+    .form-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+    .form-box button:hover { opacity: 0.9; }
+</style>
 </head>
 <body>
 
-<div class="form-box">
-  <h2>Form Pendaftaran Penyewa Baru</h2>
-  <p>Isi data dengan benar. Admin akan hubungi via WhatsApp.</p>
-  
-  <form action="https://formsubmit.co/ozziekost@gmail.com" method="POST">
-    <input type="text" name="Nama Lengkap" placeholder="Nama Lengkap" required>
-    <input type="tel" name="No WhatsApp" placeholder="No WhatsApp" required>
-    <input type="text" name="Asal Kampus" placeholder="Asal Kampus: UGM / UNY / UII / dll" required>
-    
-    <label>Pilih Rumah Kost:</label>
-    <select name="Pilih Rumah" required>
-      <option value="">-- Pilih --</option>
-      <option value="Yogya Ozzie 1 - PUTRA">Yogya Ozzie 1 - PUTRA</option>
-      <option value="Yogya Ozzie 2 - PUTRI">Yogya Ozzie 2 - PUTRI</option>
-      <option value="Yogya Ozzie 3 - PUTRI">Yogya Ozzie 3 - PUTRI</option>
-    </select>
+    <!-- HEADER BARU + TOMBOL KEMBALI -->
+    <div class="header">
+        <h1>OZZIEKOST</h1>
+        <a href="index.html" class="btn-kembali">← Kembali ke Beranda</a>
+    </div>
 
-    <label>Tipe Kamar:</label>
-    <select name="Tipe Kamar" required>
-      <option value="Standard">Standard - Rp 2000.000</option>
-      <option value="Superior">Superior - Rp 2.500.000</option>
-      <option value="Delux">Delux - Rp 3.500.000</option>
-    </select>
+    <div class="form-box">
+        <h2>Form Pendaftaran Penyewa Baru</h2>
+        <p>Isi data dengan benar. Admin akan hubungi via WhatsApp.</p>
 
-    <input type="text" name="Durasi Sewa" placeholder="Durasi Sewa: 6 bulan / 1 tahun">
-    <textarea name="Catatan" placeholder="Catatan tambahan"></textarea>
+        <input type="text" placeholder="Nama Lengkap" required>
+        <input type="text" placeholder="No WhatsApp" required>
+        <input type="text" placeholder="Asal Kampus: UGM / UNY / UII / dll">
+        
+        <label><b>Pilih Rumah Kost:</b></label>
+        <select>
+            <option>-- Pilih --</option>
+            <option>OZZIEKOST 1 - Gejayan</option>
+            <option>OZZIEKOST 2 - Babarsari</option>
+        </select>
 
-    <button type="submit">Kirim Pendaftaran</button>
-  </form>
-</div>
+        <label><b>Tipe Kamar:</b></label>
+        <select>
+            <option>Standard - Rp 2000.000</option>
+            <option>Premium - Rp 2500.000</option>
+        </select>
+
+        <input type="text" placeholder="Durasi Sewa: 6 bulan / 1 tahun">
+        <textarea rows="3" placeholder="Catatan tambahan"></textarea>
+
+        <button>Kirim Pendaftaran</button>
+    </div>
 
 </body>
 </html>
