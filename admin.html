@@ -120,18 +120,13 @@
       let filtered = dataPenghuni;
       
       if(unit !== 'all') filtered = filtered.filter(p => p.unit == unit);
-      if(search) filtered = filtered.filter(p => p.user.includes(search));
-      
+      if(search) filtered = filtered.filter(p => p.user.includes(search));  
       tampilkanTabel(filtered);
     }
     hitungKeuangan();
-    tampilkanTabel(dataPenghuni);
-  
-  ffunction logout(){
-    localStorage.removeItem('userLogin'); // hapus sesi login
-    alert("Logout Berhasil!");
-    window.location.href = "/ozziekostnet/login.html"; // <-- TAMBAH /ozziekostnet/
-}unction logout(){
+    tampilkanTabel(dataPenghuni); 
+}
+      function logout(){
     localStorage.removeItem('userLogin'); // hapus sesi login
     alert("Logout Berhasil!");
     window.location.href = "login.html"; // balik ke login
