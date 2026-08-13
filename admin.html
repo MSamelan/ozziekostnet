@@ -17,7 +17,7 @@
 </head>
 <body>
  <div class="container">
-    <button class="logout" onclick="logout()">Logout</button>
+       <button class="logout" onclick="logout()">Logout</button>
     <h1>Dashboard Admin OZZIEKOST</h1>
 
     <!-- BOX RINGKASAN KEUANGAN -->
@@ -130,11 +130,11 @@ if(!localStorage.getItem('userLogin')){
     hitungKeuangan();
     tampilkanTabel(dataPenghuni); 
 }
-      function logout(){
-    localStorage.removeItem('userLogin'); // hapus sesi login
-    alert("Logout Berhasil!");
-    window.location.href = "login.html"; // balik ke login
-}
+        function logout(){
+        localStorage.removeItem('userLogin');
+        alert("Logout Berhasil!");
+        window.location.href = "login.html";
+    }
     </script>
 </body>
 </html>
