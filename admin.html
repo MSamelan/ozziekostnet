@@ -39,40 +39,51 @@ if(window.location.pathname.includes("admin.html") && !localStorage.getItem('use
     window.location.href = "login.html";
 }  
 
+// HARGA UDAH DISERAGAMKAN SAMA HOMEPAGE
 const dataPenghuni = [
-  {user: "BUDI01", unit: 1, tipe: "Standar", harga: 800000},
-  {user: "SITI02", unit: 2, tipe: "VIP", harga: 1200000},
+  {user: "BUDI01", unit: 1, tipe: "Standard", harga: 2000000},
+  {user: "SITI02", unit: 2, tipe: "Superior", harga: 2500000},
+  {user: "AGUS03", unit: 3, tipe: "Delux", harga: 3500000},
+  {user: "DEWI04", unit: 4, tipe: "Standard", harga: 2000000},
+  {user: "RONI05", unit: 5, tipe: "Superior", harga: 2500000},
 ];
 
 function cekStatusBayar(user) { return Math.random() > 0.4; }
 
-function hitungKeuangan() {
+function hitungKeuangan(data) {
     let pemasukanBulan = 0;
-    dataPenghuni.forEach(p => { if(cekStatusBayar(p.user)){ pemasukanBulan += p.harga; }});
+    data.forEach(p => { if(p.lunas){ pemasukanBulan += p.harga; }});
     document.getElementById('pemasukanBulan').innerText = 'Rp ' + pemasukanBulan.toLocaleString('id-ID');
 }
   
-function tampilkanTabel(data) {
-  const tbody = document.getElementById('bodyTabel'); tbody.innerHTML = '';
-  data.forEach((p, i) => {
-    const lunas = cekStatusBayar(p.user);
-    tbody.innerHTML += `<tr><td>${i+1}</td><td>${p.user}</td><td>Unit ${p.unit}</td><td>${p.tipe}</td><td>Rp ${p.harga.toLocaleString('id-ID')}</td><td>25 Agustus</td><td class="${lunas?'lunas':'belum'}">${lunas?'Lunas':'Belum'}</td></tr>`;
+function tampilkanTabel(dataAsli) {
+  // GENERATE STATUS 1X DI AWAL BIAR SAMA
+  const dataDenganStatus = dataAsli.map(p => {
+      return {...p, lunas: cekStatusBayar(p.user)}
   });
-  document.getElementById('total').innerText = `Total: ${data.length} Penghuni`;
+
+  const tbody = document.getElementById('bodyTabel'); tbody.innerHTML = '';
+  dataDenganStatus.forEach((p, i) => {
+    tbody.innerHTML += `<tr><td>${i+1}</td><td>${p.user}</td><td>Unit ${p.unit}</td><td>${p.tipe}</td><td>Rp ${p.harga.toLocaleString('id-ID')}</td><td>25 Agustus</td><td class="${p.lunas?'lunas':'belum'}">${p.lunas?'Lunas':'Belum'}</td></tr>`;
+  });
+  document.getElementById('total').innerText = `Total: ${dataDenganStatus.length} Penghuni`;
+  
+  hitungKeuangan(dataDenganStatus); // HITUNG PAKE DATA YG SAMA
 }
   
 function filterTable() {
   const search = document.getElementById('search').value.toUpperCase();
-  tampilkanTabel(dataPenghuni.filter(p => p.user.includes(search)));  
+  const hasilFilter = dataPenghuni.filter(p => p.user.includes(search));
+  tampilkanTabel(hasilFilter);  
 }
 
-hitungKeuangan();
+// PANGGIL 1X AJA
 tampilkanTabel(dataPenghuni); 
 
 function logout(){
     localStorage.removeItem('userLogin');
     alert("Logout Berhasil!");
-    window.location.href = "index.html";  // <-- UDAH KE HOME
+    window.location.href = "index.html";  // KE HOME
 }
 </script>
 </body>
