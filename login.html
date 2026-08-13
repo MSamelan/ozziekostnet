@@ -67,12 +67,20 @@ function login() {
     "OZIDLX317": "123456", "OZIDLX318": "123456", "OZIDLX319": "123456", "OZIDLX320": "123456"
   };
 
-  if(users[username] && users[username] === password) {
-    window.location.href = 'dashboard.html?user=' + username;
-  } else {
-    error.style.display = 'block';
-    error.innerText = 'Username atau Password salah';
-  }
+ if(users[username] === password){
+    localStorage.setItem('userLogin', username);
+
+    if(username === "ADMIN"){
+        // Kalau login admin, langsung ke halaman admin
+        window.location.href = "admin.html";
+    } else {
+        // Kalau penghuni biasa, ke dashboard biasa
+        window.location.href = "dashboard.html";
+    }
+
+} else {
+    alert("Username atau Password SALAH!");
+}
 }
 </script>
 </body>
