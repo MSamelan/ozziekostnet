@@ -2,85 +2,135 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Penghuni - OZZIEKOST</title>
+  <title>Login OZZIEKOST + MFA</title>
   <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background:linear-gradient(135deg, #0d6efd, #0056b3); height:100vh; display:flex; justify-content:center; align-items:center; margin:0; }
-    .login-box { background:white; padding:40px; border-radius:15px; width:90%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.2); text-align:center; }
-    .login-box h2 { color:#0d6efd; margin-bottom:10px; }
-    .login-box p { color:#666; margin-bottom:30px; }
-    input { width:100%; padding:14px; margin:10px 0; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; }
-    button { background:#ffc107; color:#000; padding:14px; border:none; border-radius:8px; width:100%; font-size:16px; font-weight:bold; cursor:pointer; margin-top:10px; }
-    button:hover { background:#e0a800; }
-    .back { margin-top:20px; font-size:14px; }
-    .back a { color:#0d6efd; text-decoration:none; }
-    .notice { background:#fff3cd; padding:10px; border-radius:8px; font-size:13px; margin-top:20px; color:#856404; }
+    body { font-family: Arial; background: #007bff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .login-box { background: white; padding: 40px; border-radius: 15px; width: 400px; text-align: center; }
+    .login-box input, .login-box select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+    .login-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .hint { font-size: 12px; color: #666; margin-top: 5px; }
   </style>
 </head>
 <body>
+  <div class="login-box">
+    <h2>Login OZZIEKOST</h2>
+    
+    <!-- STEP 1: USERNAME PASSWORD -->
+    <div id="step1" class="step active">
+      <select id="role">
+        <option value="">Login Sebagai...</option>
+        <option value="admin">Admin</option>
+        <option value="resident">Resident</option>
+      </select>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="loginStep1()">Login</button>
+      <p class="hint">Belum punya PIN? Daftar dulu di bawah</p>
+      <button onclick="showRegister()" style="background:#28a745; margin-top:5px;">Daftar Akun Baru</button>
+    </div>
 
-<div class="login-box">
-  <h2>Login Ozziekost Residen</h2>
-  <p>Khusus OZZIEKOST Residen yang sudah ACC</p>
-  
-  <form onsubmit="return false">
-    <input type="text" id="username" placeholder="Username / No Kamar" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button type="button" onclick="login()">Masuk</button>
-  </form>
+    <!-- STEP 2: OTP + PIN -->
+    <div id="step2" class="step">
+      <p>1. Cek Alert untuk kode OTP <br> 2. Masukkan OTP + PIN 6 angka kamu</p>
+      <input type="text" id="otpInput" placeholder="Masukkan 6 digit OTP dari Alert" maxlength="6">
+      <input type="password" id="pinInput" placeholder="Masukkan PIN 6 angka kamu" maxlength="6">
+      <button onclick="verifikasiMFA()">Verifikasi & Masuk</button>
+    </div>
 
-  <div class="notice">
-    ⚠️ Lupa password? Chat Admin via WhatsApp: +628xxx xxx xxx
+    <!-- STEP DAFTAR -->
+    <div id="stepDaftar" class="step">
+      <h3>Daftar Akun + Set PIN</h3>
+      <select id="regRole">
+        <option value="resident">Resident</option>
+        <option value="admin">Admin</option>
+      </select>
+      <input type="text" id="regUser" placeholder="Buat Username">
+      <input type="password" id="regPass" placeholder="Buat Password">
+      <input type="password" id="regPin" placeholder="Buat PIN 6 Angka" maxlength="6">
+      <button onclick="daftarAkun()">Simpan Akun</button>
+      <button onclick="backToLogin()" style="background:#6c757d; margin-top:5px;">Kembali</button>
+    </div>
   </div>
-<p id="error" style="display:none; color:red; text-align:center; margin-top:10px;">Username/Password salah</p>
-  <div class="back">
-    <a href="index.html">← Kembali ke Home</a>
-  </div>
-</div>
 
 <script>
-function login() {
-  const username = document.getElementById('username').value.toUpperCase().trim();
-  const password = document.getElementById('password').value.trim();
-  const error = document.getElementById('error');
-  error.style.display = 'none';
+let kodeOTP = ""; 
+let userLoginSaatIni = "";
 
-  const users = {
-   "Admin": "Test-test123", 
-    // UNIT 1 - PUTRA - 20 KAMAR
-    "OZASTD101": "123456", "OZASTD102": "123456", "OZASTD103": "123456", "OZASTD104": "123456",
-    "OZASTD105": "123456", "OZASTD106": "123456", "OZASTD107": "123456", "OZASTD108": "123456",
-    "OZASUP109": "123456", "OZASUP110": "123456", "OZASUP111": "123456", "OZASUP112": "123456",
-    "OZASUP113": "123456", "OZASUP114": "123456", "OZASUP115": "123456", "OZASUP116": "123456",
-    "OZADLX117": "123456", "OZADLX118": "123456", "OZADLX119": "123456", "OZADLX120": "123456",
-    // UNIT 2 - PUTRI - 20 KAMAR
-    "OZISTD201": "123456", "OZISTD202": "123456", "OZISTD203": "123456", "OZISTD204": "123456",
-    "OZISTD205": "123456", "OZISTD206": "123456", "OZISTD207": "123456", "OZISTD208": "123456",
-    "OZISUP209": "123456", "OZISUP210": "123456", "OZISUP211": "123456", "OZISUP212": "123456",
-    "OZISUP213": "123456", "OZISUP214": "123456", "OZISUP215": "123456", "OZISUP216": "123456",
-    "OZIDLX217": "123456", "OZIDLX218": "123456", "OZIDLX219": "123456", "OZIDLX220": "123456",
-    // UNIT 3 - PUTRI - 20 KAMAR
-    "OZISTD301": "123456", "OZISTD302": "123456", "OZISTD303": "123456", "OZISTD304": "123456",
-    "OZISTD305": "123456", "OZISTD306": "123456", "OZISTD307": "123456", "OZISTD308": "123456",
-    "OZISUP309": "123456", "OZISUP310": "123456", "OZISUP311": "123456", "OZISUP312": "123456",
-    "OZISUP313": "123456", "OZISUP314": "123456", "OZISUP315": "123456", "OZISUP316": "123456",
-    "OZIDLX317": "123456", "OZIDLX318": "123456", "OZIDLX319": "123456", "OZIDLX320": "123456"
-  };
+// DATA DUMMY ADMIN. NANTI BISA DIHAPUS KALAU UDAH DAFTAR
+const defaultAdmin = {user: "Admin", pass: "Test-test123", pin: "123456"};
 
- if(users[username] === password){
-    localStorage.setItem('userLogin', username);
+function loginStep1(){
+    const role = document.getElementById('role').value;
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
 
-    if(username === "ADMIN"){
-        // Kalau login admin, langsung ke halaman admin
-        window.location.href = "admin.html";
-    } else {
-        // Kalau penghuni biasa, ke dashboard biasa
-        window.location.href = "dashboard.html";
+    // AMBIL DATA DARI LOCALSTORAGE
+    let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
+    users.push(defaultAdmin); // tambahin admin default
+
+    const foundUser = users.find(u => u.user === user && u.pass === pass && u.role === role);
+
+    if(!foundUser){
+        alert("Username/Password/Role Salah!");
+        return;
     }
 
-} else {
-    alert("Username atau Password SALAH!");
+    // 1. GENERATE OTP 6 DIGIT RANDOM
+    kodeOTP = Math.floor(100000 + Math.random() * 900000);
+    alert("KODE OTP KAMU: " + kodeOTP + "\n\nJangan kasih ke siapapun!");
+
+    userLoginSaatIni = foundUser; // simpan data user yg login
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
 }
+
+function verifikasiMFA(){
+    const otpInput = document.getElementById('otpInput').value;
+    const pinInput = document.getElementById('pinInput').value;
+
+    // 2. CEK OTP DARI ALERT + PIN PRIBADI
+    if(otpInput === kodeOTP.toString() && pinInput === userLoginSaatIni.pin){
+        localStorage.setItem('userLogin', userLoginSaatIni.role); // simpan role
+        localStorage.setItem('usernameLogin', userLoginSaatIni.user); // simpan username
+        alert("Login Berhasil!");
+        
+        if(userLoginSaatIni.role === "admin"){
+            window.location.href = "admin.html";
+        } else {
+            window.location.href = "index.html"; 
+        }
+    } else {
+        alert("OTP atau PIN Salah!");
+    }
+}
+
+// FUNGSI DAFTAR
+function showRegister(){
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('stepDaftar').classList.add('active');
+}
+function backToLogin(){
+    document.getElementById('stepDaftar').classList.remove('active');
+    document.getElementById('step1').classList.add('active');
+}
+function daftarAkun(){
+    const role = document.getElementById('regRole').value;
+    const user = document.getElementById('regUser').value;
+    const pass = document.getElementById('regPass').value;
+    const pin = document.getElementById('regPin').value;
+
+    if(pin.length !== 6 || isNaN(pin)){
+        alert("PIN harus 6 angka!");
+        return;
+    }
+
+    let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
+    users.push({role, user, pass, pin});
+    localStorage.setItem('ozzieUsers', JSON.stringify(users));
+    alert("Akun Berhasil Dibuat! Silahkan Login");
+    backToLogin();
 }
 </script>
 </body>
