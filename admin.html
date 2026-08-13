@@ -34,13 +34,10 @@
   </div>
   
 <script>
-<script>
 // Cek login HANYA untuk halaman admin
 if(window.location.pathname.includes("admin.html") && !localStorage.getItem('userLogin')){
     window.location.href = "login.html";
 }  
-
-const dataPenghuni = [
 
 const dataPenghuni = [
   {user: "BUDI01", unit: 1, tipe: "Standar", harga: 800000},
@@ -75,9 +72,8 @@ tampilkanTabel(dataPenghuni);
 function logout(){
     localStorage.removeItem('userLogin');
     alert("Logout Berhasil!");
-    window.location.href = "index.html";  // <-- GANTI KE HOME
+    window.location.href = "index.html";  // <-- UDAH KE HOME
 }
 </script>
 </body>
 </html>
-Fix logout function
