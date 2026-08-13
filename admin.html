@@ -20,121 +20,60 @@
        <button class="logout" onclick="logout()">Logout</button>
     <h1>Dashboard Admin OZZIEKOST</h1>
 
-    <!-- BOX RINGKASAN KEUANGAN -->
-    <div style="display: flex; gap: 15px; margin: 20px 0; flex-wrap: wrap;">
-        <div style="flex:1; background:#e7f3ff; padding:15px; border-radius:10px; border-left:5px solid #007bff;">
-            <h4>Pemasukan Bulan Ini</h4>
-            <h2 id="pemasukanBulan">Rp 0</h2>
-        </div>
-        <div style="flex:1; background:#e8ffe7; padding:15px; border-radius:10px; border-left:5px solid #28a745;">
-            <h4>Total Pemasukan YTD 2026</h4>
-            <h2 id="pemasukanTahun">Rp 0</h2>
-        </div>
-        <div style="flex:1; background:#fff3e7; padding:15px; border-radius:10px; border-left:5px solid #fd7e14;">
-            <h4>Tagihan Jatuh Tempo</h4>
-            <h2 id="jatuhTempo">25 Agustus 2026</h2>
-        </div>
+    <div style="display: flex; gap: 15px; margin: 20px 0;">
+        <div style="flex:1; background:#e7f3ff; padding:15px; border-radius:10px;"><h4>Pemasukan Bulan Ini</h4><h2 id="pemasukanBulan">Rp 0</h2></div>
+        <div style="flex:1; background:#e8ffe7; padding:15px; border-radius:10px;"><h4>Total Pemasukan YTD</h4><h2 id="pemasukanTahun">Rp 0</h2></div>
+        <div style="flex:1; background:#fff3e7; padding:15px; border-radius:10px;"><h4>Jatuh Tempo</h4><h2 id="jatuhTempo">25 Agustus 2026</h2></div>
     </div>
     
     <input type="text" id="search" placeholder="Cari Username..." onkeyup="filterTable()">
-    <select id="filterUnit" onchange="filterTable()">
-      <option value="all">Semua Unit</option>
-      <option value="1">Unit 1 - Putra</option>
-      <option value="2">Unit 2 - Putri</option>
-      <option value="3">Unit 3 - Putri</option>
-    </select>
+    <select id="filterUnit" onchange="filterTable()"><option value="all">Semua Unit</option></select>
     <span id="total"></span>
 
-    <table id="tabelPenghuni">
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Username</th>
-          <th>Unit</th>
-          <th>Tipe Kamar</th>
-   <th>Harga</th>
-<th>Next Due Date</th>
-<th>Status Bayar</th>
-        </tr>
-      </thead>
-      <tbody id="bodyTabel"></tbody>
-    </table>
+    <table><thead><tr><th>No</th><th>Username</th><th>Unit</th><th>Tipe</th><th>Harga</th><th>Next Due</th><th>Status</th></tr></thead><tbody id="bodyTabel"></tbody></table>
   </div>
   
-    <script>
-    // Cek login, kalau ga ada lempar ke login
+<script>
 if(!localStorage.getItem('userLogin')){
     window.location.href = "login.html";
 }  
-    // Data sewa: tiap tgl 25 jatuh tempo
-    const TANGGAL_JATUH_TEMPO = 25; 
 
-    const dataPenghuni = [
-      // ... BIARKAN DATA 60 PENGHUNI KAMU YG LAMA DI SINI JANGAN DIHAPUS ...
-    ];
+const dataPenghuni = [
+  {user: "BUDI01", unit: 1, tipe: "Standar", harga: 800000},
+  {user: "SITI02", unit: 2, tipe: "VIP", harga: 1200000},
+];
 
-    function cekStatusBayar(user) {
-        // Sementara random. Nanti ganti ambil dari localStorage
-        return Math.random() > 0.4; 
-    }
+function cekStatusBayar(user) { return Math.random() > 0.4; }
 
-    function hitungKeuangan() {
-        let pemasukanBulan = 0;
-        let pemasukanTahun = 0;
-        const bulanSekarang = new Date().getMonth() + 1; // 1-12
-        
-        dataPenghuni.forEach(p => {
-            if(cekStatusBayar(p.user)){
-                pemasukanBulan += p.harga;
-                pemasukanTahun += p.harga * bulanSekarang; // YTD = harga x jumlah bulan
-            }
-        });
-
-        document.getElementById('pemasukanBulan').innerText = 'Rp ' + pemasukanBulan.toLocaleString('id-ID');
-        document.getElementById('pemasukanTahun').innerText = 'Rp ' + pemasukanTahun.toLocaleString('id-ID');
-    }
-  
-    function tampilkanTabel(data) {
-      const tbody = document.getElementById('bodyTabel');
-      tbody.innerHTML = '';
-      data.forEach((p, i) => {
-        const lunas = cekStatusBayar(p.user);
-        const status = lunas ? 'Lunas' : 'Belum Bayar';
-        const bulanIni = new Date().toLocaleString('id-ID', {month: 'long'});
-        const nextDue = `25 ${bulanIni} 2026`; 
-        const classStatus = lunas ? 'lunas' : 'belum';
-        tbody.innerHTML += `
-          <tr>
-            <td>${i+1}</td>
-            <td>${p.user}</td>
-            <td>Unit ${p.unit}</td>
-            <td>${p.tipe}</td>
-            <td>Rp ${p.harga.toLocaleString('id-ID')}</td>
-            <td>${nextDue}</td>
-            <td class="${classStatus}">${status}</td>
-          </tr>
-        `;
-      });
-      document.getElementById('total').innerText = `Total: ${data.length} Penghuni`;
-    }
-  
-    function filterTable() {
-      const search = document.getElementById('search').value.toUpperCase();
-      const unit = document.getElementById('filterUnit').value;
-      let filtered = dataPenghuni;
-      
-      if(unit !== 'all') filtered = filtered.filter(p => p.unit == unit);
-      if(search) filtered = filtered.filter(p => p.user.includes(search));  
-      tampilkanTabel(filtered);
-    }
-    hitungKeuangan();
-    tampilkanTabel(dataPenghuni); 
+function hitungKeuangan() {
+    let pemasukanBulan = 0;
+    dataPenghuni.forEach(p => { if(cekStatusBayar(p.user)){ pemasukanBulan += p.harga; }});
+    document.getElementById('pemasukanBulan').innerText = 'Rp ' + pemasukanBulan.toLocaleString('id-ID');
 }
-        function logout(){
-        localStorage.removeItem('userLogin');
-        alert("Logout Berhasil!");
-        window.location.href = "login.html";
-    }
-    </script>
+  
+function tampilkanTabel(data) {
+  const tbody = document.getElementById('bodyTabel'); tbody.innerHTML = '';
+  data.forEach((p, i) => {
+    const lunas = cekStatusBayar(p.user);
+    tbody.innerHTML += `<tr><td>${i+1}</td><td>${p.user}</td><td>Unit ${p.unit}</td><td>${p.tipe}</td><td>Rp ${p.harga.toLocaleString('id-ID')}</td><td>25 Agustus</td><td class="${lunas?'lunas':'belum'}">${lunas?'Lunas':'Belum'}</td></tr>`;
+  });
+  document.getElementById('total').innerText = `Total: ${data.length} Penghuni`;
+}
+  
+function filterTable() {
+  const search = document.getElementById('search').value.toUpperCase();
+  tampilkanTabel(dataPenghuni.filter(p => p.user.includes(search)));  
+}
+
+hitungKeuangan();
+tampilkanTabel(dataPenghuni); 
+
+function logout(){
+    localStorage.removeItem('userLogin');
+    alert("Logout Berhasil!");
+    window.location.href = "login.html";
+}
+</script>
 </body>
 </html>
+Fix logout function
