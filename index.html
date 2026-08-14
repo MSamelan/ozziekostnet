@@ -6,20 +6,20 @@
   <title>Login OZZIEKOST</title>
   <style>
     body { font-family: Arial; background: #007bff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-.login-box { background: white; padding: 35px; border-radius: 15px; width: 400px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
-.login-box h2 { color: #007bff; margin-bottom: 20px; }
-.login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
-.login-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; font-size: 16px; }
-.login-box button:hover { opacity: 0.9; }
-.step { display: none; }
-.step.active { display: block; }
-.hint { font-size: 12px; color: #666; margin-top: 10px; }
-.link { color: #007bff; cursor: pointer; text-decoration: underline; font-size: 14px; }
-.btn-green { background: #28a745; }
-.btn-gray { background: #6c757d; }
-.password-wrapper { position: relative; }
-.toggle-pass { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; }
-.error { color: red; font-size: 12px; text-align: left; margin-top: -5px; margin-bottom: 5px; }
+   .login-box { background: white; padding: 35px; border-radius: 15px; width: 400px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+   .login-box h2 { color: #007bff; margin-bottom: 20px; }
+   .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+   .login-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; font-size: 16px; }
+   .login-box button:hover { opacity: 0.9; }
+   .step { display: none; }
+   .step.active { display: block; }
+   .hint { font-size: 12px; color: #666; margin-top: 10px; }
+   .link { color: #007bff; cursor: pointer; text-decoration: underline; font-size: 14px; }
+   .btn-green { background: #28a745; }
+   .btn-gray { background: #6c757d; }
+   .password-wrapper { position: relative; }
+   .toggle-pass { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; }
+   .error { color: red; font-size: 12px; text-align: left; margin-top: -5px; margin-bottom: 5px; }
   </style>
 </head>
 <body>
@@ -49,7 +49,7 @@
       <p class="hint"><span class="link" onclick="backToLogin()">Kembali ke Login</span></p>
     </div>
 
-    <!-- STEP 3: DAFTAR - HANYA BISA DIAKSES ADMIN SETELAH LOGIN -->
+    <!-- STEP 3: DAFTAR - HANYA BISA DIAKSES ADMIN -->
     <div id="stepDaftar" class="step">
       <h3>Form Pendaftaran Resident Baru</h3>
       <p style="font-size:12px; color:#666;">Hanya untuk calon resident yang sudah Approved, Sign Contract, Bayar 1 Bulan + Bond 1 Bulan</p>
@@ -75,9 +75,10 @@
       <input type="text" id="forgotUser" placeholder="Username atau Email">
       <input type="text" id="forgotDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
       <div class="password-wrapper">
-        <input type="password" id="newPass" placeholder="Buat Password Baru">
+        <input type="password" id="newPass" placeholder="Buat Password Baru" onkeyup="cekPasswordBaru()">
         <span class="toggle-pass" onclick="togglePassword('newPass')">👁️</span>
       </div>
+      <div id="passErrorBaru" class="error"></div>
       <div class="password-wrapper">
         <input type="password" id="newPin" placeholder="Buat PIN 6 Angka Baru" maxlength="6">
         <span class="toggle-pass" onclick="togglePassword('newPin')">👁️</span>
@@ -117,6 +118,17 @@ function cekPassword(){
     errorDiv.innerText = errors.length > 0? "Kurang: " + errors.join(", ") : "";
     return errors.length === 0;
 }
+function cekPasswordBaru(){
+    const pass = document.getElementById('newPass').value;
+    const errorDiv = document.getElementById('passErrorBaru');
+    let errors = [];
+    if(pass.length < 12) errors.push("Min 12 karakter");
+    if(!/[A-Z]/.test(pass)) errors.push("1 Huruf Besar");
+    if(!/[0-9].*[0-9].*[0-9].*[0-9]/.test(pass)) errors.push("4 Angka");
+    if(!/[@#$%&*]/.test(pass)) errors.push("1 Simbol @#$%&*");
+    errorDiv.innerText = errors.length > 0? "Kurang: " + errors.join(", ") : "";
+    return errors.length === 0;
+}
 
 function loginStep1(){
     const user = document.getElementById('username').value;
@@ -147,9 +159,6 @@ function verifikasiMFA(){
 function showForgot(){ hideAll(); document.getElementById('stepLupa').classList.add('active'); }
 function backToLogin(){ hideAll(); document.getElementById('step1').classList.add('active'); }
 function hideAll(){ document.querySelectorAll('.step').forEach(s => s.classList.remove('active')); }
-
-// FUNGSI DAFTAR HANYA BISA DIBUKA DARI ADMIN
-function showRegisterFromAdmin(){ hideAll(); document.getElementById('stepDaftar').classList.add('active'); }
 function backToDashboard(){ window.location.href = "admin.html"; }
 
 function daftarAkun(){
@@ -174,7 +183,8 @@ function resetPassPin(){
     const dob = document.getElementById('forgotDob').value;
     const newPass = document.getElementById('newPass').value;
     const newPin = document.getElementById('newPin').value;
-    if(newPin.length!== 6 ||!cekPassword()){ alert("Password/PIN tidak valid!"); return; }
+    if(newPin.length!== 6){ alert("PIN harus 6 angka!"); return; }
+    if(!cekPasswordBaru()){ alert("Password tidak memenuhi syarat!"); return; }
     let users = getAllUsers();
     const userIndex = users.findIndex(u => (u.user === user || u.email === user) && u.dob === dob);
     if(userIndex === -1){ alert("Data tidak cocok!"); return; }
@@ -184,6 +194,15 @@ function resetPassPin(){
     alert("Password/PIN Berhasil Direset!");
     backToLogin();
 }
+
+// AUTO BUKA FORM DAFTAR KALAU DARI ADMIN
+document.addEventListener('DOMContentLoaded', function() {
+    if(localStorage.getItem('modeDaftar') === 'admin'){
+        localStorage.removeItem('modeDaftar');
+        hideAll();
+        document.getElementById('stepDaftar').classList.add('active');
+    }
+});
 </script>
 </body>
 </html>
