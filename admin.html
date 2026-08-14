@@ -1,1 +1,176 @@
 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Admin OZZIEKOST</title>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; margin: 0; }
+.header { background: #007bff; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+.sidebar { width: 250px; background: white; height: 100vh; position: fixed; padding-top: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; }
+.sidebar a { display: block; padding: 12px 20px; color: #333; text-decoration: none; cursor: pointer; }
+.sidebar a:hover,.sidebar a.active { background: #007bff; color: white; }
+.sidebar .submenu { padding-left: 35px; font-size: 14px; display: none; }
+.sidebar .submenu a { padding: 8px 20px; }
+.main { margin-left: 250px; padding: 20px; }
+.card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    button { padding: 10px 15px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button.btn-primary { background: #007bff; }
+    button.btn-success { background: #28a745; }
+    button.btn-warning { background: #ffc107; color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    table th, table td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
+    table th { background: #f2f2f2; }
+.status { padding: 5px 10px; border-radius: 5px; color: white; font-size: 12px; }
+.status.pending { background: #ffc107; color: #333; }
+.status.active { background: #28a745; }
+.status.baru { background: #ffc107; color: #333; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Dashboard Admin OZZIEKOST</h2>
+    <div>
+      <span id="userInfo"></span>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <a class="active" onclick="showMenu('dashboard', this)">📊 Dashboard</a>
+    
+    <a onclick="toggleSubmenu('dataKostSub')"><span>🏠 Data Kost</span></a>
+    <div id="dataKostSub" class="submenu">
+      <a onclick="showMenu('pendaftaran', this)">📝 Data Pendaftaran</a>
+      <a onclick="showMenu('penghuni', this)">👥 Data Resident</a>
+      <a onclick="showMenu('bayar', this)">💰 Data Pembayaran</a>
+    </div>
+
+    <a onclick="showMenu('maintenance', this)">🔧 Maintenance</a>
+  </div>
+
+  <div class="main">
+    <div id="dashboard" class="menu">
+      <h3>Selamat Datang, <span id="namaAdmin"></span>!</h3>
+      <div class="card">
+        <h4>Ringkasan</h4>
+        <p>Total Kamar: <b id="totalKamar">12</b></p>
+        <p>Penghuni Aktif: <b id="totalResident">0</b></p>
+        <p>Calon Pendaftar: <b id="totalPending">0</b></p>
+        <p>Laporan Rusak Baru: <b>1</b></p>
+      </div>
+    </div>
+
+    <div id="pendaftaran" class="menu" style="display:none;">
+      <h3>📝 Data Pendaftaran Calon Resident</h3>
+      <div class="card">
+        <table id="tabelPendaftaran">
+          <thead><tr><th>Nama</th><th>Email</th><th>No HP</th><th>Tgl Lahir</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="penghuni" class="menu" style="display:none;">
+      <h3>👥 Data Resident</h3>
+      <div class="card">
+        <button class="btn-success" onclick="bukaFormDaftar()">+ Tambah Resident Baru</button>
+        <table id="tabelResident">
+          <thead><tr><th>Nama</th><th>Email</th><th>No Kamar</th><th>Tgl Lahir</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="bayar" class="menu" style="display:none;">
+      <h3>💰 Data Pembayaran</h3>
+      <div class="card"><p>Belum ada data</p></div>
+    </div>
+
+    <div id="maintenance" class="menu" style="display:none;">
+      <h3>🔧 Data Maintenance</h3>
+      <div class="card"><p>Belum ada data</p></div>
+    </div>
+  </div>
+
+<script>
+  // CEK LOGIN DULU
+  const role = localStorage.getItem('userLogin');
+  const username = localStorage.getItem('usernameLogin');
+
+  if(role!== 'admin'){
+    alert("Akses ditolak! Silahkan login sebagai Admin dulu di index.html");
+    window.location.href = "index.html";
+  } else {
+    document.getElementById('userInfo').innerText = "Halo, " + username;
+    document.getElementById('namaAdmin').innerText = username;
+    // Jalanin setelah pasti login
+    window.addEventListener('DOMContentLoaded', loadTabel);
+  }
+
+  function logout(){
+    localStorage.removeItem('userLogin');
+    localStorage.removeItem('usernameLogin');
+    alert("Logout Berhasil");
+    window.location.href = "index.html";
+  }
+
+  function showMenu(menu, el){
+    document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
+    document.getElementById(menu).style.display = 'block';
+    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+    if(menu === 'pendaftaran' || menu === 'penghuni'){ loadTabel(); }
+  }
+
+  function toggleSubmenu(id){
+    const sub = document.getElementById(id);
+    sub.style.display = sub.style.display === 'block'? 'none' : 'block';
+  }
+
+  function bukaFormDaftar(){
+    localStorage.setItem('modeDaftar', 'admin');
+    window.location.href = "index.html";
+  }
+
+  function loadTabel(){
+    try {
+        let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
+        const tbodyPendaftar = document.querySelector('#tabelPendaftaran tbody');
+        const tbodyResident = document.querySelector('#tabelResident tbody');
+        if(!tbodyPendaftar || !tbodyResident) return;
+
+        tbodyPendaftar.innerHTML = '';
+        tbodyResident.innerHTML = '';
+
+        let totalResident = 0;
+        let totalPending = 0;
+
+        users.filter(u => u.role === 'resident').forEach(u => {
+            if(u.status === 'pending'){
+                totalPending++;
+                tbodyPendaftar.innerHTML += `<tr>
+                    <td>${u.user}</td><td>${u.email}</td><td>${u.hp || '-'}</td><td>${u.dob}</td>
+                    <td><span class="status pending">Pending</span></td>
+                    <td><button class="btn-success" onclick="alert('Silahkan ke menu Tambah Resident Baru')">Approve</button></td>
+                </tr>`;
+            }
+            if(u.status === 'active'){
+                totalResident++;
+                tbodyResident.innerHTML += `<tr>
+                    <td>${u.user}</td><td>${u.email}</td><td>${u.room || '-'}</td><td>${u.dob}</td>
+                    <td><span class="status active">Active</span></td>
+                    <td>Edit</td>
+                </tr>`;
+            }
+        });
+
+        document.getElementById('totalResident').innerText = totalResident;
+        document.getElementById('totalPending').innerText = totalPending;
+    } catch(e){
+        console.log("Error loadTabel: ", e);
+    }
+  }
+</script>
+</body>
+</html>
