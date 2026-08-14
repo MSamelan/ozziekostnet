@@ -38,7 +38,7 @@
     <a href="#" onclick="showMenu('kost', this)">🏠 Data Kost</a>
     <a href="#" onclick="showMenu('penghuni', this)">👥 Data Penghuni</a>
     <a href="#" onclick="showMenu('bayar', this)">💰 Data Pembayaran</a>
-    <a href="#" onclick="showMenu('maintenance', this)">🔧 Maintenance</a> <!-- MENU BARU -->
+    <a href="#" onclick="showMenu('maintenance', this)">🔧 Maintenance</a>
   </div>
 
   <div class="main">
@@ -48,7 +48,7 @@
       <div class="card">
         <h4>Ringkasan</h4>
         <p>Total Kamar: 12</p>
-        <p>Penghuni Aktif: 8</p>
+        <p>Penghuni Aktif: 1</p>
         <p>Laporan Rusak Baru: 1</p>
       </div>
     </div>
@@ -57,17 +57,24 @@
     <div id="kost" class="menu" style="display:none;">
       <h3>Data Kost</h3>
       <div class="card">
-        <p>Disini nanti untuk tambah/edit/hapus data kamar kost</p>
         <button class="btn-primary">+ Tambah Kamar</button>
+        <table>
+          <tr><th>No Kamar</th><th>Tipe</th><th>Harga</th><th>Status</th><th>Aksi</th></tr>
+          <tr><td>A-03</td><td>Kamar Mandi Dalam</td><td>Rp 1.200.000</td><td>Terisi</td><td>Edit | Hapus</td></tr>
+        </table>
       </div>
     </div>
 
-    <!-- MENU PENGHUNI -->
+    <!-- MENU PENGHUNI - ADA TOMBOL DAFTAR BARU -->
     <div id="penghuni" class="menu" style="display:none;">
       <h3>Data Penghuni</h3>
       <div class="card">
-        <p>Disini nanti untuk data penghuni + assign ke kamar</p>
-        <button class="btn-primary">+ Tambah Penghuni</button>
+        <p style="color:#666; font-size:14px;">Catatan: Tombol di bawah hanya untuk calon resident yang sudah Approved, Sign Contract, Bayar 1 Bulan + Bond 1 Bulan</p>
+        <button class="btn-success" onclick="bukaFormDaftar()">+ Tambah Resident Baru</button>
+        <table>
+          <tr><th>Nama</th><th>Email</th><th>No Kamar</th><th>No HP</th><th>Aksi</th></tr>
+          <tr><td>Budi</td><td>budi@mail.com</td><td>A-03</td><td>0812345678</td><td>Edit | Hapus</td></tr>
+        </table>
       </div>
     </div>
 
@@ -75,40 +82,28 @@
     <div id="bayar" class="menu" style="display:none;">
       <h3>Data Pembayaran</h3>
       <div class="card">
-        <p>Disini nanti untuk input pembayaran + cetak kuitansi</p>
         <button class="btn-primary">+ Input Pembayaran</button>
+        <table>
+          <tr><th>Nama</th><th>Bulan</th><th>Jumlah</th><th>Status</th><th>Aksi</th></tr>
+          <tr><td>Budi</td><td>Agustus 2026</td><td>Rp 1.200.000</td><td>Lunas</td><td>Cetak</td></tr>
+        </table>
       </div>
     </div>
 
-    <!-- MENU MAINTENANCE BARU -->
+    <!-- MENU MAINTENANCE -->
     <div id="maintenance" class="menu" style="display:none;">
       <h3>🔧 Data Maintenance / Laporan Kerusakan</h3>
       <div class="card">
         <button class="btn-primary">+ Tambah Laporan Manual</button>
         <table>
           <thead>
-            <tr>
-              <th>No</th>
-              <th>Tanggal</th>
-              <th>Pelapor</th>
-              <th>Kamar</th>
-              <th>Keluhan</th>
-              <th>Status</th>
-              <th>Aksi</th>
-            </tr>
+            <tr><th>No</th><th>Tanggal</th><th>Pelapor</th><th>Kamar</th><th>Keluhan</th><th>Status</th><th>Aksi</th></tr>
           </thead>
           <tbody>
             <tr>
-              <td>1</td>
-              <td>14-08-2026</td>
-              <td>Budi</td>
-              <td>A-03</td>
-              <td>AC tidak dingin</td>
+              <td>1</td><td>14-08-2026</td><td>Budi</td><td>A-03</td><td>AC tidak dingin</td>
               <td><span class="status baru">Baru</span></td>
-              <td>
-                <button class="btn-warning">Proses</button>
-                <button class="btn-success">Selesai</button>
-              </td>
+              <td><button class="btn-warning">Proses</button> <button class="btn-success">Selesai</button></td>
             </tr>
           </tbody>
         </table>
@@ -142,6 +137,20 @@
     document.getElementById(menu).style.display = 'block';
     document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
     el.classList.add('active');
+  }
+
+  // FUNGSI BARU: BUKA FORM DAFTAR DI INDEX.HTML
+  function bukaFormDaftar(){
+    // Simpan status bahwa yg buka adalah admin
+    localStorage.setItem('modeDaftar', 'admin');
+    window.location.href = "index.html";
+  }
+
+  // Cek kalau balik dari form daftar
+  window.onload = function(){
+    if(localStorage.getItem('modeDaftar') === 'admin'){
+      localStorage.removeItem('modeDaftar');
+    }
   }
 </script>
 </body>
