@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -10,24 +9,26 @@
 .sidebar { width: 250px; background: white; height: 100vh; position: fixed; padding-top: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; }
 .sidebar a { display: block; padding: 12px 20px; color: #333; text-decoration: none; cursor: pointer; }
 .sidebar a:hover,.sidebar a.active { background: #007bff; color: white; }
-.sidebar .submenu { padding-left: 35px; font-size: 14px; display: none; }
-.sidebar .submenu a { padding: 8px 20px; }
+.sidebar.submenu { padding-left: 35px; font-size: 14px; display: none; }
+.sidebar.submenu a { padding: 8px 20px; }
 .main { margin-left: 250px; padding: 20px; }
 .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     button { padding: 10px 15px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; }
     button.btn-primary { background: #007bff; }
     button.btn-success { background: #28a745; }
     button.btn-warning { background: #ffc107; color: #333; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
     table th, table td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
     table th { background: #f2f2f2; }
     table select { padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
+   .alert { padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+   .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
 .status { padding: 5px 10px; border-radius: 5px; color: white; font-size: 12px; }
 .status.pending { background: #ffc107; color: #333; }
 .status.active { background: #28a745; }
 .status.waiting { background: #17a2b8; }
 .status.reject { background: #dc3545; }
-.status.baru { background: #ffc107; color: #333; }
   </style>
 </head>
 <body>
@@ -43,7 +44,7 @@
     <a class="active" onclick="showMenu('dashboard', this)">📊 Dashboard</a>
     <a onclick="toggleSubmenu('dataKostSub')"><span>🏠 Data Kost</span></a>
     <div id="dataKostSub" class="submenu" style="display:block;">
-      <a class="active" onclick="showMenu('pendaftaran', this)">📝 Data Pendaftaran</a>
+      <a onclick="showMenu('pendaftaran', this)">📝 Data Pendaftaran</a>
       <a onclick="showMenu('penghuni', this)">👥 Data Resident</a>
       <a onclick="showMenu('bayar', this)">💰 Data Pembayaran</a>
     </div>
@@ -51,20 +52,20 @@
   </div>
 
   <div class="main">
-    <div id="dashboard" class="menu" style="display:none;">
+    <div id="dashboard" class="menu">
       <h3>Selamat Datang, <span id="namaAdmin"></span>!</h3>
       <div class="card">
         <h4>Ringkasan</h4>
         <p>Total Kamar: <b id="totalKamar">12</b></p>
         <p>Penghuni Aktif: <b id="totalResident">0</b></p>
         <p>Calon Pendaftar: <b id="totalPending">0</b></p>
-        <p>Laporan Rusak Baru: <b>1</b></p>
       </div>
     </div>
 
-    <div id="pendaftaran" class="menu">
+    <div id="pendaftaran" class="menu" style="display:none;">
       <h3>📝 Data Pendaftaran Calon Resident</h3>
       <div class="card">
+        <div id="rateLimitInfo" class="alert alert-warning" style="display:none;"></div>
         <table id="tabelPendaftaran">
           <thead><tr><th>Nama</th><th>Email</th><th>No HP</th><th>Tgl Lahir</th><th>Status</th><th>Aksi</th></tr></thead>
           <tbody></tbody>
@@ -75,7 +76,8 @@
     <div id="penghuni" class="menu" style="display:none;">
       <h3>👥 Data Resident</h3>
       <div class="card">
-        <button class="btn-success" onclick="bukaFormDaftar()">+ Tambah Resident Baru</button>
+        <button id="btnTambahResident" class="btn-success" onclick="bukaFormDaftar()">+ Tambah Resident Baru</button>
+        <p id="rateLimitText" style="font-size:12px; color:#666;"></p>
         <table id="tabelResident">
           <thead><tr><th>Nama</th><th>Email</th><th>No Kamar</th><th>Tgl Lahir</th><th>Status</th><th>Aksi</th></tr></thead>
           <tbody></tbody>
@@ -88,6 +90,7 @@
   </div>
 
 <script>
+  const MAX_PER_DAY = 10; // BATAS 10 PER HARI
   const role = localStorage.getItem('userLogin');
   const username = localStorage.getItem('usernameLogin');
 
@@ -97,7 +100,7 @@
   } else {
     document.getElementById('userInfo').innerText = "Halo, " + username;
     document.getElementById('namaAdmin').innerText = username;
-    window.addEventListener('DOMContentLoaded', loadTabel);
+    window.addEventListener('DOMContentLoaded', () => { loadTabel(); cekRateLimit(); });
   }
 
   function logout(){
@@ -112,7 +115,7 @@
     document.getElementById(menu).style.display = 'block';
     document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
     el.classList.add('active');
-    if(menu === 'pendaftaran' || menu === 'penghuni'){ loadTabel(); }
+    if(menu === 'pendaftaran' || menu === 'penghuni'){ loadTabel(); cekRateLimit(); }
   }
 
   function toggleSubmenu(id){
@@ -120,7 +123,55 @@
     sub.style.display = sub.style.display === 'block'? 'none' : 'block';
   }
 
+  // === RATE LIMITING FUNCTION ===
+  function cekRateLimit(){
+    const today = new Date().toISOString().split('T')[0];
+    let log = JSON.parse(localStorage.getItem('adminActionLog')) || {};
+    const adminKey = username; // batasi per akun admin
+    
+    if(!log[today]) log[today] = {};
+    if(!log[today][adminKey]) log[today][adminKey] = 0;
+
+    const count = log[today][adminKey];
+    const sisa = MAX_PER_DAY - count;
+
+    document.getElementById('rateLimitText').innerText = `Sisa kuota tambah resident hari ini: ${sisa} dari ${MAX_PER_DAY}`;
+    
+    const btn = document.getElementById('btnTambahResident');
+    if(count >= MAX_PER_DAY){
+        btn.disabled = true;
+        document.getElementById('rateLimitInfo').style.display = 'block';
+        document.getElementById('rateLimitInfo').innerText = `⚠️ Batas tambah resident 10x/hari sudah tercapai. Reset jam 00:00`;
+    } else {
+        btn.disabled = false;
+        document.getElementById('rateLimitInfo').style.display = 'none';
+    }
+  }
+
+  function tambahRateLimit(){
+    const today = new Date().toISOString().split('T')[0];
+    let log = JSON.parse(localStorage.getItem('adminActionLog')) || {};
+    const adminKey = username;
+    if(!log[today]) log[today] = {};
+    if(!log[today][adminKey]) log[today][adminKey] = 0;
+    log[today][adminKey]++;
+    localStorage.setItem('adminActionLog', JSON.stringify(log));
+  }
+
   function bukaFormDaftar(){
+    // CEK RATE LIMIT DULU SEBELUM PINDAH
+    const today = new Date().toISOString().split('T')[0];
+    let log = JSON.parse(localStorage.getItem('adminActionLog')) || {};
+    const adminKey = username;
+    if(!log[today]) log[today] = {};
+    if(!log[today][adminKey]) log[today][adminKey] = 0;
+
+    if(log[today][adminKey] >= MAX_PER_DAY){
+        alert(`Batas tambah resident 10x/hari sudah tercapai.`);
+        return;
+    }
+    
+    tambahRateLimit(); // +1
     localStorage.setItem('modeDaftar', 'admin');
     window.location.href = "index.html";
   }
@@ -139,7 +190,7 @@
         if(confirm(`Yakin mau Reject ${users[userIndex].user}? Data akan dihapus`)){
             users.splice(userIndex, 1);
             alert("Data dihapus");
-        }
+        } else { return; }
     }
     localStorage.setItem('ozzieUsers', JSON.stringify(users));
     loadTabel();
@@ -150,7 +201,7 @@
         let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
         const tbodyPendaftar = document.querySelector('#tabelPendaftaran tbody');
         const tbodyResident = document.querySelector('#tabelResident tbody');
-        if(!tbodyPendaftar || !tbodyResident) return;
+        if(!tbodyPendaftar ||!tbodyResident) return;
 
         tbodyPendaftar.innerHTML = '';
         tbodyResident.innerHTML = '';
