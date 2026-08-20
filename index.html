@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login OZZIEKOST</title>
-  <style>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> <style>
     body { font-family: Arial; background: #007bff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
 .login-box { background: white; padding: 35px; border-radius: 15px; width: 420px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
 .login-box h2 { color: #007bff; margin-bottom: 20px; }
@@ -24,6 +24,7 @@
 .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
 .modal-content { background: white; padding: 25px; border-radius: 10px; width: 400px; text-align: left; }
 .modal-content h3 { text-align: center; color: #007bff; margin-top: 0; }
+.cf-turnstile { margin: 15px 0; display: flex; justify-content: center; } /* TAMBAHAN BUAT TAMPILAN TURNSTILE */
   </style>
 </head>
 <body>
@@ -35,95 +36,14 @@
       <form id="formLogin" autocomplete="off">
         <input type="text" id="username" placeholder="Email Address or Username">
         <div class="password-wrapper"><input type="password" id="password" placeholder="Password"><span class="toggle-pass" onclick="togglePassword('password')">👁️</span></div>
-        <button type="button" onclick="loginStep1()">Login</button>
+        
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAEWi7VyX_qtLolIN"></div> <button type="button" onclick="loginStep1()">Login</button>
       </form>
       <p class="hint"><span class="link" onclick="showPendaftaran()">Daftar Jadi Calon Resident</span> | <span class="link" onclick="showForgot()">Lupa Password/PIN?</span></p>
     </div>
-
-    <!-- STEP 2: OTP + PIN -->
-    <div id="step2" class="step">
-      <form id="formOTP" autocomplete="off">
-        <p><b>Verifikasi 2 Langkah</b><br>1. Cek Alert untuk kode OTP <br> 2. Masukkan OTP + PIN 6 angka kamu</p>
-        <input type="text" id="otpInput" placeholder="Masukkan 6 digit OTP dari Alert" maxlength="6">
-        <div class="password-wrapper"><input type="password" id="pinInput" placeholder="Masukkan PIN 6 angka kamu" maxlength="6"><span class="toggle-pass" onclick="togglePassword('pinInput')">👁️</span></div>
-        <button type="button" onclick="verifikasiMFA()">Verifikasi & Masuk</button>
-      </form>
-      <p class="hint"><span class="link" onclick="backToLogin()">Kembali ke Login</span></p>
-    </div>
-
-    <!-- STEP 3: FORM PENDAFTARAN CALON RESIDENT - PUBLIK -->
-    <div id="stepPendaftaran" class="step">
-      <h3>Form Pendaftaran Calon Resident</h3>
-      <form id="formCalon" autocomplete="off">
-        <input type="text" id="calonNama" placeholder="Nama Lengkap">
-        <input type="email" id="calonEmail" placeholder="Email Address">
-        <input type="text" id="calonHp" placeholder="No HP / WA">
-        <input type="text" id="calonDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
-        <button type="button" class="btn-green" onclick="daftarCalon()">Kirim Pendaftaran</button>
-        <button type="button" class="btn-gray" onclick="backToLogin()">Kembali ke Login</button>
-      </form>
-    </div>
-
-    <!-- STEP 4: FORM ADMIN - DAFTAR RESIDENT BARU / RESET -->
-    <div id="stepDaftar" class="step">
-      <h3>Form Resident Baru</h3>
-      <p style="font-size:12px; color:#666;">Untuk calon resident yang sudah Approved + Bayar 1 Bulan + Bond 1 Bulan</p>
-      <form id="formAdmin" autocomplete="off">
-        <select id="modeForm" onchange="gantiModeForm()">
-          <option value="daftar">Daftar Baru</option>
-          <option value="reset">Reset Password/PIN</option>
-        </select>
-        <input type="text" id="regUser" placeholder="Username">
-        <input type="email" id="regEmail" placeholder="Email Address">
-        <input type="text" id="regRoom" placeholder="Nomor Kamar: contoh OZI1005">
-        <input type="text" id="regDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
-        <div id="boxTempPass" class="info-box"><b>Password Sementara:</b> Salam@123456 <br><b>PIN Sementara:</b> 654321</div>
-        <div id="boxGantiPass" style="display:none;">
-          <div class="password-wrapper"><input type="password" id="newPass1" placeholder="New Password: 12 Character" onkeyup="cekPasswordBaru()"><span class="toggle-pass" onclick="togglePassword('newPass1')">👁️</span></div>
-          <div class="password-wrapper"><input type="password" id="newPass2" placeholder="Confirm Password: 12 Character"><span class="toggle-pass" onclick="togglePassword('newPass2')">👁️</span></div>
-          <div id="passErrorBaru" class="error"></div>
-          <div class="password-wrapper"><input type="password" id="newPin" placeholder="New PIN: 6 Angka" maxlength="6"><span class="toggle-pass" onclick="togglePassword('newPin')">👁️</span></div>
-        </div>
-        <button type="button" class="btn-green" onclick="cekSebelumSimpan()">Simpan</button>
-        <button type="button" class="btn-gray" onclick="backToDashboard()">Kembali ke Dashboard</button>
-      </form>
-    </div>
-
-    <!-- STEP 5: LUPA PASSWORD/PIN -->
-    <div id="stepLupa" class="step">
-      <h3>Reset Password/PIN</h3>
-      <form id="formLupa" autocomplete="off">
-        <input type="text" id="forgotUser" placeholder="Username atau Email">
-        <input type="text" id="forgotDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
-        <div class="password-wrapper"><input type="password" id="newPass" placeholder="Buat Password Baru"><span class="toggle-pass" onclick="togglePassword('newPass')">👁️</span></div>
-        <div class="password-wrapper"><input type="password" id="newPinLupa" placeholder="Buat PIN 6 Angka Baru" maxlength="6"><span class="toggle-pass" onclick="togglePassword('newPinLupa')">👁️</span></div>
-        <button type="button" class="btn-green" onclick="resetPassPin()">Reset</button>
-        <button type="button" class="btn-gray" onclick="backToLogin()">Kembali</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- POP UP MODAL SET PASSWORD BARU -->
-  <div id="modalSetPass" class="modal">
-    <div class="modal-content">
-      <h3>Set Password & PIN Baru</h3>
-      <form id="formModal" autocomplete="off">
-        <div class="info-box"><b>Password Sementara:</b> Salam@123456 <br><b>PIN Sementara:</b> 654321</div>
-        <label>New Passwords: 12 Character</label>
-        <div class="password-wrapper"><input type="password" id="popNewPass1" placeholder="New Passwords" onkeyup="cekPasswordPop()"><span class="toggle-pass" onclick="togglePassword('popNewPass1')">👁️</span></div>
-        <label>Confirm New Password:</label>
-        <div class="password-wrapper"><input type="password" id="popNewPass2" placeholder="Confirm New Password"><span class="toggle-pass" onclick="togglePassword('popNewPass2')">👁️</span></div>
-        <div id="passErrorPop" class="error"></div>
-        <label>New PIN: 6 Angka</label>
-        <div class="password-wrapper"><input type="password" id="popNewPin1" placeholder="New PIN" maxlength="6"><span class="toggle-pass" onclick="togglePassword('popNewPin1')">👁️</span></div>
-        <label>Confirm New PIN:</label>
-        <div class="password-wrapper"><input type="password" id="popNewPin2" placeholder="Confirm New PIN" maxlength="6"><span class="toggle-pass" onclick="togglePassword('popNewPin2')">👁️</span></div>
-      </form>
-      <button type="button" class="btn-green" onclick="simpanDariModal()">OK</button>
-      <button type="button" class="btn-gray" onclick="tutupModal()">Batal</button>
-    </div>
-  </div>
-
+    
+   ... kode kamu yang lain tetap sama sampai akhir...
+    
 <script>
 let kodeOTP = "";
 let userLoginSaatIni = "";
@@ -131,181 +51,43 @@ let dataTempDaftar = {};
 const TEMP_PASS = "Salam@123456";
 const TEMP_PIN = "654321";
 
-const defaultAdmin = {role: "admin", user: "Admin", email: "admin@ozziekost.com", pass: "Test-test1234@", dob: "01-01-1990", pin: "123456", room: "", status: "active"};
-const defaultResident = {role: "resident", user: "Budi", email: "budi@anakkost.com", pass: TEMP_PASS, dob: "01-01-1990", pin: TEMP_PIN, room: "OZA1005", status: "pending"};
-
-function getAllUsers(){ let users = JSON.parse(localStorage.getItem('ozzieUsers')) || []; if(!users.find(u => u.user === "Admin")){ users.push(defaultAdmin); } if(!users.find(u => u.user === "Budi")){ users.push(defaultResident); } return users; }
+function getAllUsers(){ let users = JSON.parse(localStorage.getItem('ozzieUsers')) || []; if(!users.find(u => u.user === "Admin")){ users.push({role: "admin", user: "Admin", email: "admin@ozziekost.com", pass: "Test-test1234@", dob: "01-01-1990", pin: "123456", room: "", status: "active"}); } if(!users.find(u => u.user === "Budi")){ users.push({role: "resident", user: "Budi", email: "budi@anakkost.com", pass: TEMP_PASS, dob: "01-01-1990", pin: TEMP_PIN, room: "OZA1005", status: "pending"}); } return users; }
 function saveUsers(users){ localStorage.setItem('ozzieUsers', JSON.stringify(users)); }
 function togglePassword(id){ const input = document.getElementById(id); input.type = input.type === "password"? "text" : "password"; }
 function validasiTanggal(tgl){ return /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[012])-(19|20)\d\d$/.test(tgl); }
+function resetForm(formId){ document.getElementById(formId).reset(); turnstile.reset(); } // RESET TURNSTILE JUGA
 
-function resetForm(formId){ document.getElementById(formId).reset(); } // FUNGSI BARU BUAT NGOSONGIN FORM
-
-function cekPassword(elm, errElm){
-    const pass = document.getElementById(elm).value;
-    const errorDiv = document.getElementById(errElm);
-    let errors = [];
-    if(pass.length < 12) errors.push("Min 12 karakter");
-    if(!/[A-Z]/.test(pass)) errors.push("1 Huruf Besar");
-    if(!/[0-9].*[0-9].*[0-9].*[0-9]/.test(pass)) errors.push("4 Angka");
-    if(!/[@#$%&*]/.test(pass)) errors.push("1 Simbol @#$%&*");
-    errorDiv.innerText = errors.length > 0? "Kurang: " + errors.join(", ") : "";
-    return errors.length === 0;
-}
-function cekPasswordBaru(){ return cekPassword('newPass1','passErrorBaru'); }
-function cekPasswordPop(){ return cekPassword('popNewPass1','passErrorPop'); }
-
-function gantiModeForm(){
-    const mode = document.getElementById('modeForm').value;
-    document.getElementById('boxTempPass').style.display = mode === 'daftar'? 'block' : 'none';
-    document.getElementById('boxGantiPass').style.display = mode === 'reset'? 'block' : 'none';
-}
-
-function loginStep1(){
+async function loginStep1(){
     const user = document.getElementById('username').value;
     const pass = document.getElementById('password').value;
+    const turnstileToken = document.querySelector('[name=cf-turnstile-response]').value; // AMBIL TOKEN TURNSTILE
+
     if(!user ||!pass){ alert("Semua field wajib diisi!"); return; }
-    const users = getAllUsers();
-    const foundUser = users.find(u => (u.user === user || u.email === user) && u.pass === pass && u.status === 'active');
-    if(!foundUser){ alert("Username/Email atau Password Salah, atau Akun belum Aktif!"); resetForm('formLogin'); return; } // RESET JIKA GAGAL
+    if(!turnstileToken){ alert("Harap verifikasi bahwa kamu manusia!"); return; } // CEK TURNSTILE
+
+    // KIRIM KE WORKER BUAT VALIDASI
+    const response = await fetch('https://ozzie-login-worker.ozziekost.workers.dev', { // GANTI URL INI NANTI
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username: user, password: pass, token: turnstileToken})
+    });
+    const result = await response.json();
+
+    if(!result.success){ alert(result.message); resetForm('formLogin'); return; }
+
     kodeOTP = Math.floor(100000 + Math.random() * 900000);
     alert("KODE OTP KAMU: " + kodeOTP);
-    userLoginSaatIni = foundUser;
-    resetForm('formLogin'); // RESET SETELAH LOGIN SUKSES
+    userLoginSaatIni = result.user;
+    resetForm('formLogin');
     hideAll();
     document.getElementById('step2').classList.add('active');
 }
 
-function verifikasiMFA(){
-    const otpInput = document.getElementById('otpInput').value;
-    const pinInput = document.getElementById('pinInput').value;
-    if(otpInput === kodeOTP.toString() && pinInput === userLoginSaatIni.pin){
-        localStorage.setItem('userLogin', userLoginSaatIni.role);
-        localStorage.setItem('usernameLogin', userLoginSaatIni.user);
-        alert("Login Berhasil!");
-        resetForm('formOTP'); // RESET OTP
-        if(userLoginSaatIni.role === "admin"){ window.location.href = "admin.html"; } 
-        else { window.location.href = "resident.html"; }
-    } else { alert("OTP atau PIN Salah!"); resetForm('formOTP'); } // RESET JIKA GAGAL
-}
-
-// 1. DAFTAR CALON RESIDENT
-function showPendaftaran(){ hideAll(); document.getElementById('stepPendaftaran').classList.add('active'); }
-function daftarCalon(){
-    const nama = document.getElementById('calonNama').value;
-    const email = document.getElementById('calonEmail').value;
-    const hp = document.getElementById('calonHp').value;
-    const dob = document.getElementById('calonDob').value;
-    if(!nama ||!email ||!hp ||!dob){ alert("Semua field wajib diisi!"); return; }
-    if(!validasiTanggal(dob)){ alert("Format Tanggal Lahir salah! DD-MM-YYYY"); return; }
-    let users = getAllUsers();
-    if(users.find(u => u.email === email)){ alert("Email sudah terdaftar!"); return; }
-    users.push({role: "resident", user: nama, email, pass: "", dob, pin: "", room: "", status: "pending", hp});
-    saveUsers(users);
-    alert("Pendaftaran Berhasil! Menunggu Approval Admin");
-    resetForm('formCalon'); // RESET SETELAH DAFTAR
-    backToLogin();
-}
-
-// 2. DAFTAR RESIDENT BARU OLEH ADMIN
-function cekSebelumSimpan(){
-    const mode = document.getElementById('modeForm').value;
-    const user = document.getElementById('regUser').value;
-    const email = document.getElementById('regEmail').value;
-    const room = document.getElementById('regRoom').value;
-    const dob = document.getElementById('regDob').value;
-    
-    if(!user ||!email ||!room ||!dob){ alert("Semua field wajib diisi!"); return; }
-    if(!validasiTanggal(dob)){ alert("Format Tanggal Lahir salah! DD-MM-YYYY"); return; }
-    let users = getAllUsers();
-    if(users.find(u => u.user === user || u.email === email) && users.find(u=>u.email===email).status==='active'){ alert("Username atau Email sudah terdaftar!"); return; }
-
-    if(mode === 'daftar'){
-        dataTempDaftar = {user, email, room, dob};
-        document.getElementById('modalSetPass').style.display = 'flex';
-    } else {
-        simpanFormAdmin();
-    }
-}
-
-function simpanDariModal(){
-    const newPass1 = document.getElementById('popNewPass1').value;
-    const newPass2 = document.getElementById('popNewPass2').value;
-    const newPin1 = document.getElementById('popNewPin1').value;
-    const newPin2 = document.getElementById('popNewPin2').value;
-
-    if(newPass1!== newPass2){ alert("New Password dan Confirm tidak sama!"); return; }
-    if(newPin1!== newPin2){ alert("New PIN dan Confirm PIN tidak sama!"); return; }
-    if(!cekPasswordPop()){ alert("Password tidak memenuhi syarat!"); return; }
-    if(newPin1.length!== 6){ alert("PIN harus 6 angka!"); return; }
-
-    let users = getAllUsers();
-    const existing = users.findIndex(u => u.email === dataTempDaftar.email && u.status === 'pending');
-    if(existing!== -1){
-        users[existing] = {role: "resident", user: dataTempDaftar.user, email: dataTempDaftar.email, pass: newPass1, dob: dataTempDaftar.dob, pin: newPin1, room: dataTempDaftar.room, status: "active"};
-    } else {
-        users.push({role: "resident", user: dataTempDaftar.user, email: dataTempDaftar.email, pass: newPass1, dob: dataTempDaftar.dob, pin: newPin1, room: dataTempDaftar.room, status: "active"});
-    }
-    saveUsers(users);
-    alert("Akun Resident Berhasil Dibuat & Masuk ke Data Resident!");
-    resetForm('formModal'); // RESET MODAL
-    tutupModal();
-    backToDashboard();
-}
-
-function tutupModal(){ document.getElementById('modalSetPass').style.display = 'none'; resetForm('formModal'); } // RESET SAAT BATAL
-
-function simpanFormAdmin(){ 
-    const user = document.getElementById('regUser').value;
-    const email = document.getElementById('regEmail').value;
-    const newPass1 = document.getElementById('newPass1').value;
-    const newPass2 = document.getElementById('newPass2').value;
-    const newPin = document.getElementById('newPin').value;
-    if(newPass1!== newPass2){ alert("New Password dan Confirm Password tidak sama!"); return; }
-    if(!cekPasswordBaru()){ alert("Password tidak memenuhi syarat!"); return; }
-    if(newPin.length!== 6){ alert("PIN harus 6 angka!"); return; }
-    let users = getAllUsers();
-    const userIndex = users.findIndex(u => u.user === user || u.email === email);
-    if(userIndex === -1){ alert("User tidak ditemukan!"); return; }
-    users[userIndex].pass = newPass1;
-    users[userIndex].pin = newPin;
-    users[userIndex].status = 'active';
-    saveUsers(users);
-    alert("Data Resident Berhasil Direset!");
-    resetForm('formAdmin'); // RESET FORM ADMIN
-    backToDashboard();
-}
-
-function showForgot(){ hideAll(); document.getElementById('stepLupa').classList.add('active'); }
-function backToLogin(){ hideAll(); resetForm('formLogin'); resetForm('formOTP'); resetForm('formLupa'); resetForm('formCalon'); document.getElementById('step1').classList.add('active'); } // RESET SEMUA SAAT KEMBALI
+//... sisa fungsi kamu yang lain tetap sama...
+function verifikasiMFA(){... }
+function daftarCalon(){... resetForm('formCalon'); backToLogin(); }
+function backToLogin(){ hideAll(); resetForm('formLogin'); resetForm('formOTP'); resetForm('formLupa'); resetForm('formCalon'); document.getElementById('step1').classList.add('active'); }
 function hideAll(){ document.querySelectorAll('.step').forEach(s => s.classList.remove('active')); }
-function backToDashboard(){ resetForm('formAdmin'); window.location.href = "admin.html"; } // RESET SAAT KEMBALI
-
-function resetPassPin(){
-    const user = document.getElementById('forgotUser').value;
-    const dob = document.getElementById('forgotDob').value;
-    const newPass = document.getElementById('newPass').value;
-    const newPin = document.getElementById('newPinLupa').value;
-    if(newPin.length!== 6){ alert("PIN harus 6 angka!"); return; }
-    let users = getAllUsers();
-    const userIndex = users.findIndex(u => (u.user === user || u.email === user) && u.dob === dob);
-    if(userIndex === -1){ alert("Data tidak cocok!"); return; }
-    users[userIndex].pass = newPass;
-    users[userIndex].pin = newPin;
-    users[userIndex].status = 'active';
-    saveUsers(users);
-    alert("Password/PIN Berhasil Direset!");
-    resetForm('formLupa'); // RESET SETELAH RESET
-    backToLogin();
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    if(localStorage.getItem('modeDaftar') === 'admin'){
-        localStorage.removeItem('modeDaftar');
-        hideAll();
-        document.getElementById('stepDaftar').classList.add('active');
-    }
-});
 </script>
 </body>
 </html>
