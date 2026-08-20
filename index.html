@@ -32,64 +32,74 @@
 
     <!-- STEP 1: LOGIN -->
     <div id="step1" class="step active">
-      <input type="text" id="username" placeholder="Email Address or Username">
-      <div class="password-wrapper"><input type="password" id="password" placeholder="Password"><span class="toggle-pass" onclick="togglePassword('password')">👁️</span></div>
-      <button onclick="loginStep1()">Login</button>
+      <form id="formLogin" autocomplete="off">
+        <input type="text" id="username" placeholder="Email Address or Username">
+        <div class="password-wrapper"><input type="password" id="password" placeholder="Password"><span class="toggle-pass" onclick="togglePassword('password')">👁️</span></div>
+        <button type="button" onclick="loginStep1()">Login</button>
+      </form>
       <p class="hint"><span class="link" onclick="showPendaftaran()">Daftar Jadi Calon Resident</span> | <span class="link" onclick="showForgot()">Lupa Password/PIN?</span></p>
     </div>
 
     <!-- STEP 2: OTP + PIN -->
     <div id="step2" class="step">
-      <p><b>Verifikasi 2 Langkah</b><br>1. Cek Alert untuk kode OTP <br> 2. Masukkan OTP + PIN 6 angka kamu</p>
-      <input type="text" id="otpInput" placeholder="Masukkan 6 digit OTP dari Alert" maxlength="6">
-      <div class="password-wrapper"><input type="password" id="pinInput" placeholder="Masukkan PIN 6 angka kamu" maxlength="6"><span class="toggle-pass" onclick="togglePassword('pinInput')">👁️</span></div>
-      <button onclick="verifikasiMFA()">Verifikasi & Masuk</button>
+      <form id="formOTP" autocomplete="off">
+        <p><b>Verifikasi 2 Langkah</b><br>1. Cek Alert untuk kode OTP <br> 2. Masukkan OTP + PIN 6 angka kamu</p>
+        <input type="text" id="otpInput" placeholder="Masukkan 6 digit OTP dari Alert" maxlength="6">
+        <div class="password-wrapper"><input type="password" id="pinInput" placeholder="Masukkan PIN 6 angka kamu" maxlength="6"><span class="toggle-pass" onclick="togglePassword('pinInput')">👁️</span></div>
+        <button type="button" onclick="verifikasiMFA()">Verifikasi & Masuk</button>
+      </form>
       <p class="hint"><span class="link" onclick="backToLogin()">Kembali ke Login</span></p>
     </div>
 
     <!-- STEP 3: FORM PENDAFTARAN CALON RESIDENT - PUBLIK -->
     <div id="stepPendaftaran" class="step">
       <h3>Form Pendaftaran Calon Resident</h3>
-      <input type="text" id="calonNama" placeholder="Nama Lengkap">
-      <input type="email" id="calonEmail" placeholder="Email Address">
-      <input type="text" id="calonHp" placeholder="No HP / WA">
-      <input type="text" id="calonDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
-      <button class="btn-green" onclick="daftarCalon()">Kirim Pendaftaran</button>
-      <button class="btn-gray" onclick="backToLogin()">Kembali ke Login</button>
+      <form id="formCalon" autocomplete="off">
+        <input type="text" id="calonNama" placeholder="Nama Lengkap">
+        <input type="email" id="calonEmail" placeholder="Email Address">
+        <input type="text" id="calonHp" placeholder="No HP / WA">
+        <input type="text" id="calonDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
+        <button type="button" class="btn-green" onclick="daftarCalon()">Kirim Pendaftaran</button>
+        <button type="button" class="btn-gray" onclick="backToLogin()">Kembali ke Login</button>
+      </form>
     </div>
 
     <!-- STEP 4: FORM ADMIN - DAFTAR RESIDENT BARU / RESET -->
     <div id="stepDaftar" class="step">
       <h3>Form Resident Baru</h3>
       <p style="font-size:12px; color:#666;">Untuk calon resident yang sudah Approved + Bayar 1 Bulan + Bond 1 Bulan</p>
-      <select id="modeForm" onchange="gantiModeForm()">
-        <option value="daftar">Daftar Baru</option>
-        <option value="reset">Reset Password/PIN</option>
-      </select>
-      <input type="text" id="regUser" placeholder="Username">
-      <input type="email" id="regEmail" placeholder="Email Address">
-      <input type="text" id="regRoom" placeholder="Nomor Kamar: contoh OZI1005">
-      <input type="text" id="regDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
-      <div id="boxTempPass" class="info-box"><b>Password Sementara:</b> Salam@123456 <br><b>PIN Sementara:</b> 654321</div>
-      <div id="boxGantiPass" style="display:none;">
-        <div class="password-wrapper"><input type="password" id="newPass1" placeholder="New Password: 12 Character" onkeyup="cekPasswordBaru()"><span class="toggle-pass" onclick="togglePassword('newPass1')">👁️</span></div>
-        <div class="password-wrapper"><input type="password" id="newPass2" placeholder="Confirm Password: 12 Character"><span class="toggle-pass" onclick="togglePassword('newPass2')">👁️</span></div>
-        <div id="passErrorBaru" class="error"></div>
-        <div class="password-wrapper"><input type="password" id="newPin" placeholder="New PIN: 6 Angka" maxlength="6"><span class="toggle-pass" onclick="togglePassword('newPin')">👁️</span></div>
-      </div>
-      <button class="btn-green" onclick="cekSebelumSimpan()">Simpan</button>
-      <button class="btn-gray" onclick="backToDashboard()">Kembali ke Dashboard</button>
+      <form id="formAdmin" autocomplete="off">
+        <select id="modeForm" onchange="gantiModeForm()">
+          <option value="daftar">Daftar Baru</option>
+          <option value="reset">Reset Password/PIN</option>
+        </select>
+        <input type="text" id="regUser" placeholder="Username">
+        <input type="email" id="regEmail" placeholder="Email Address">
+        <input type="text" id="regRoom" placeholder="Nomor Kamar: contoh OZI1005">
+        <input type="text" id="regDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
+        <div id="boxTempPass" class="info-box"><b>Password Sementara:</b> Salam@123456 <br><b>PIN Sementara:</b> 654321</div>
+        <div id="boxGantiPass" style="display:none;">
+          <div class="password-wrapper"><input type="password" id="newPass1" placeholder="New Password: 12 Character" onkeyup="cekPasswordBaru()"><span class="toggle-pass" onclick="togglePassword('newPass1')">👁️</span></div>
+          <div class="password-wrapper"><input type="password" id="newPass2" placeholder="Confirm Password: 12 Character"><span class="toggle-pass" onclick="togglePassword('newPass2')">👁️</span></div>
+          <div id="passErrorBaru" class="error"></div>
+          <div class="password-wrapper"><input type="password" id="newPin" placeholder="New PIN: 6 Angka" maxlength="6"><span class="toggle-pass" onclick="togglePassword('newPin')">👁️</span></div>
+        </div>
+        <button type="button" class="btn-green" onclick="cekSebelumSimpan()">Simpan</button>
+        <button type="button" class="btn-gray" onclick="backToDashboard()">Kembali ke Dashboard</button>
+      </form>
     </div>
 
     <!-- STEP 5: LUPA PASSWORD/PIN -->
     <div id="stepLupa" class="step">
       <h3>Reset Password/PIN</h3>
-      <input type="text" id="forgotUser" placeholder="Username atau Email">
-      <input type="text" id="forgotDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
-      <div class="password-wrapper"><input type="password" id="newPass" placeholder="Buat Password Baru"><span class="toggle-pass" onclick="togglePassword('newPass')">👁️</span></div>
-      <div class="password-wrapper"><input type="password" id="newPinLupa" placeholder="Buat PIN 6 Angka Baru" maxlength="6"><span class="toggle-pass" onclick="togglePassword('newPinLupa')">👁️</span></div>
-      <button class="btn-green" onclick="resetPassPin()">Reset</button>
-      <button class="btn-gray" onclick="backToLogin()">Kembali</button>
+      <form id="formLupa" autocomplete="off">
+        <input type="text" id="forgotUser" placeholder="Username atau Email">
+        <input type="text" id="forgotDob" placeholder="Tanggal Lahir: DD-MM-YYYY" maxlength="10">
+        <div class="password-wrapper"><input type="password" id="newPass" placeholder="Buat Password Baru"><span class="toggle-pass" onclick="togglePassword('newPass')">👁️</span></div>
+        <div class="password-wrapper"><input type="password" id="newPinLupa" placeholder="Buat PIN 6 Angka Baru" maxlength="6"><span class="toggle-pass" onclick="togglePassword('newPinLupa')">👁️</span></div>
+        <button type="button" class="btn-green" onclick="resetPassPin()">Reset</button>
+        <button type="button" class="btn-gray" onclick="backToLogin()">Kembali</button>
+      </form>
     </div>
   </div>
 
@@ -97,18 +107,20 @@
   <div id="modalSetPass" class="modal">
     <div class="modal-content">
       <h3>Set Password & PIN Baru</h3>
-      <div class="info-box"><b>Password Sementara:</b> Salam@123456 <br><b>PIN Sementara:</b> 654321</div>
-      <label>New Passwords: 12 Character</label>
-      <div class="password-wrapper"><input type="password" id="popNewPass1" placeholder="New Passwords" onkeyup="cekPasswordPop()"><span class="toggle-pass" onclick="togglePassword('popNewPass1')">👁️</span></div>
-      <label>Confirm New Password:</label>
-      <div class="password-wrapper"><input type="password" id="popNewPass2" placeholder="Confirm New Password"><span class="toggle-pass" onclick="togglePassword('popNewPass2')">👁️</span></div>
-      <div id="passErrorPop" class="error"></div>
-      <label>New PIN: 6 Angka</label>
-      <div class="password-wrapper"><input type="password" id="popNewPin1" placeholder="New PIN" maxlength="6"><span class="toggle-pass" onclick="togglePassword('popNewPin1')">👁️</span></div>
-      <label>Confirm New PIN:</label>
-      <div class="password-wrapper"><input type="password" id="popNewPin2" placeholder="Confirm New PIN" maxlength="6"><span class="toggle-pass" onclick="togglePassword('popNewPin2')">👁️</span></div>
-      <button class="btn-green" onclick="simpanDariModal()">OK</button>
-      <button class="btn-gray" onclick="tutupModal()">Batal</button>
+      <form id="formModal" autocomplete="off">
+        <div class="info-box"><b>Password Sementara:</b> Salam@123456 <br><b>PIN Sementara:</b> 654321</div>
+        <label>New Passwords: 12 Character</label>
+        <div class="password-wrapper"><input type="password" id="popNewPass1" placeholder="New Passwords" onkeyup="cekPasswordPop()"><span class="toggle-pass" onclick="togglePassword('popNewPass1')">👁️</span></div>
+        <label>Confirm New Password:</label>
+        <div class="password-wrapper"><input type="password" id="popNewPass2" placeholder="Confirm New Password"><span class="toggle-pass" onclick="togglePassword('popNewPass2')">👁️</span></div>
+        <div id="passErrorPop" class="error"></div>
+        <label>New PIN: 6 Angka</label>
+        <div class="password-wrapper"><input type="password" id="popNewPin1" placeholder="New PIN" maxlength="6"><span class="toggle-pass" onclick="togglePassword('popNewPin1')">👁️</span></div>
+        <label>Confirm New PIN:</label>
+        <div class="password-wrapper"><input type="password" id="popNewPin2" placeholder="Confirm New PIN" maxlength="6"><span class="toggle-pass" onclick="togglePassword('popNewPin2')">👁️</span></div>
+      </form>
+      <button type="button" class="btn-green" onclick="simpanDariModal()">OK</button>
+      <button type="button" class="btn-gray" onclick="tutupModal()">Batal</button>
     </div>
   </div>
 
@@ -126,6 +138,8 @@ function getAllUsers(){ let users = JSON.parse(localStorage.getItem('ozzieUsers'
 function saveUsers(users){ localStorage.setItem('ozzieUsers', JSON.stringify(users)); }
 function togglePassword(id){ const input = document.getElementById(id); input.type = input.type === "password"? "text" : "password"; }
 function validasiTanggal(tgl){ return /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[012])-(19|20)\d\d$/.test(tgl); }
+
+function resetForm(formId){ document.getElementById(formId).reset(); } // FUNGSI BARU BUAT NGOSONGIN FORM
 
 function cekPassword(elm, errElm){
     const pass = document.getElementById(elm).value;
@@ -153,10 +167,11 @@ function loginStep1(){
     if(!user ||!pass){ alert("Semua field wajib diisi!"); return; }
     const users = getAllUsers();
     const foundUser = users.find(u => (u.user === user || u.email === user) && u.pass === pass && u.status === 'active');
-    if(!foundUser){ alert("Username/Email atau Password Salah, atau Akun belum Aktif!"); return; }
+    if(!foundUser){ alert("Username/Email atau Password Salah, atau Akun belum Aktif!"); resetForm('formLogin'); return; } // RESET JIKA GAGAL
     kodeOTP = Math.floor(100000 + Math.random() * 900000);
     alert("KODE OTP KAMU: " + kodeOTP);
     userLoginSaatIni = foundUser;
+    resetForm('formLogin'); // RESET SETELAH LOGIN SUKSES
     hideAll();
     document.getElementById('step2').classList.add('active');
 }
@@ -168,9 +183,10 @@ function verifikasiMFA(){
         localStorage.setItem('userLogin', userLoginSaatIni.role);
         localStorage.setItem('usernameLogin', userLoginSaatIni.user);
         alert("Login Berhasil!");
+        resetForm('formOTP'); // RESET OTP
         if(userLoginSaatIni.role === "admin"){ window.location.href = "admin.html"; } 
         else { window.location.href = "resident.html"; }
-    } else { alert("OTP atau PIN Salah!"); }
+    } else { alert("OTP atau PIN Salah!"); resetForm('formOTP'); } // RESET JIKA GAGAL
 }
 
 // 1. DAFTAR CALON RESIDENT
@@ -187,6 +203,7 @@ function daftarCalon(){
     users.push({role: "resident", user: nama, email, pass: "", dob, pin: "", room: "", status: "pending", hp});
     saveUsers(users);
     alert("Pendaftaran Berhasil! Menunggu Approval Admin");
+    resetForm('formCalon'); // RESET SETELAH DAFTAR
     backToLogin();
 }
 
@@ -224,36 +241,19 @@ function simpanDariModal(){
 
     let users = getAllUsers();
     const existing = users.findIndex(u => u.email === dataTempDaftar.email && u.status === 'pending');
-    if(existing!== -1){ // update dari pending ke active
-        users[existing] = {
-            role: "resident", 
-            user: dataTempDaftar.user, 
-            email: dataTempDaftar.email, 
-            pass: newPass1,
-            dob: dataTempDaftar.dob, 
-            pin: newPin1,
-            room: dataTempDaftar.room, 
-            status: "active"
-        };
-    } else { // data baru
-        users.push({
-            role: "resident", 
-            user: dataTempDaftar.user, 
-            email: dataTempDaftar.email, 
-            pass: newPass1,
-            dob: dataTempDaftar.dob, 
-            pin: newPin1,
-            room: dataTempDaftar.room, 
-            status: "active"
-        });
+    if(existing!== -1){
+        users[existing] = {role: "resident", user: dataTempDaftar.user, email: dataTempDaftar.email, pass: newPass1, dob: dataTempDaftar.dob, pin: newPin1, room: dataTempDaftar.room, status: "active"};
+    } else {
+        users.push({role: "resident", user: dataTempDaftar.user, email: dataTempDaftar.email, pass: newPass1, dob: dataTempDaftar.dob, pin: newPin1, room: dataTempDaftar.room, status: "active"});
     }
     saveUsers(users);
     alert("Akun Resident Berhasil Dibuat & Masuk ke Data Resident!");
+    resetForm('formModal'); // RESET MODAL
     tutupModal();
     backToDashboard();
 }
 
-function tutupModal(){ document.getElementById('modalSetPass').style.display = 'none'; }
+function tutupModal(){ document.getElementById('modalSetPass').style.display = 'none'; resetForm('formModal'); } // RESET SAAT BATAL
 
 function simpanFormAdmin(){ 
     const user = document.getElementById('regUser').value;
@@ -272,13 +272,14 @@ function simpanFormAdmin(){
     users[userIndex].status = 'active';
     saveUsers(users);
     alert("Data Resident Berhasil Direset!");
+    resetForm('formAdmin'); // RESET FORM ADMIN
     backToDashboard();
 }
 
 function showForgot(){ hideAll(); document.getElementById('stepLupa').classList.add('active'); }
-function backToLogin(){ hideAll(); document.getElementById('step1').classList.add('active'); }
+function backToLogin(){ hideAll(); resetForm('formLogin'); resetForm('formOTP'); resetForm('formLupa'); resetForm('formCalon'); document.getElementById('step1').classList.add('active'); } // RESET SEMUA SAAT KEMBALI
 function hideAll(){ document.querySelectorAll('.step').forEach(s => s.classList.remove('active')); }
-function backToDashboard(){ window.location.href = "admin.html"; }
+function backToDashboard(){ resetForm('formAdmin'); window.location.href = "admin.html"; } // RESET SAAT KEMBALI
 
 function resetPassPin(){
     const user = document.getElementById('forgotUser').value;
@@ -294,6 +295,7 @@ function resetPassPin(){
     users[userIndex].status = 'active';
     saveUsers(users);
     alert("Password/PIN Berhasil Direset!");
+    resetForm('formLupa'); // RESET SETELAH RESET
     backToLogin();
 }
 
