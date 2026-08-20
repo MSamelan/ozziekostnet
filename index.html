@@ -4,28 +4,29 @@
 <meta charset="UTF-8">
 <title>Login OZZIEKOST</title>
 <style>
-body{font-family:Arial;background:#f4f4f4;display:flex;justify-content:center;align-items:center;height:100vh}
-.card{background:white;padding:30px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.1);width:350px}
-input{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:5px}
-button{width:100%;padding:12px;background:#007bff;color:white;border:none;border-radius:5px;cursor:pointer;font-size:16px}
+body{font-family:Arial;background:#f4f4f4;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.card{background:white;padding:30px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.1);width:350px;text-align:center}
+input{width:93%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:5px}
+button{width:100%;padding:12px;background:#007bff;color:white;border:none;border-radius:5px;cursor:pointer;font-size:16px;margin-top:10px}
 button:hover{background:#0056b3}
+.cf-turnstile{display:flex;justify-content:center;margin:15px 0}
 </style>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
 <div class="card">
-<h2 style="text-align:center;color:#007bff">Login OZZIEKOST</h2>
+<h2 style="color:#007bff">Login OZZIEKOST</h2>
 <form id="loginForm">
   <input type="text" id="username" placeholder="Username" required>
   <input type="password" id="password" placeholder="Password" required>
   
-  <!-- INI TURNSTILE NYA -->
-  <div class="cf-turnstile" data-sitekey="0x4AAAAA_SITEKEY_KAMU_DI_SINI"></div>
+  <!-- PENTING: GANTI SITEKEY DI SINI -->
+  <div class="cf-turnstile" data-sitekey="0x4AAAAAAEWi7VyX_qtLolIN"></div>
   
   <button type="submit">Login</button>
 </form>
-<p style="text-align:center;margin-top:15px">
+<p style="text-align:center;margin-top:15px;font-size:14px">
   <a href="#">Daftar Jadi Calon Resident</a> | <a href="#">Lupa Password/PIN?</a>
 </p>
 </div>
@@ -36,14 +37,14 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   
   const user = document.getElementById('username').value;
   const pass = document.getElementById('password').value;
-  const token = turnstile.getResponse(); // ambil token turnstile
+  const token = turnstile.getResponse();
 
   if(!token){
     alert("Harap verifikasi bahwa kamu manusia!");
     return;
   }
 
-  // 1. VERIFIKASI DULU KE WORKER KITA
+  // 1. VERIFIKASI KE WORKER DULU
   const res = await fetch('https://ozzie-login-worker.samelanm.workers.dev', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -53,19 +54,19 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
   if(!result.success){
     alert(result.message);
-    turnstile.reset(); // reset biar bisa centang lagi
+    turnstile.reset();
     return;
   }
 
-  // 2. KALAU TURNSTILE OK, BARU LANJUT LOGIN LAMA KAMU
+  // 2. KALAU OK, LANJUT CEK LOGIN LAMA KAMU
   let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
-  let found = users.find(u => u.user === user && u.pass === pass); // sesuaikan sama struktur kamu
+  let found = users.find(u => u.user === user && u.pass === pass); // kalau password kamu namanya 'password' ganti jadi u.password
   
   if(found){
     localStorage.setItem('userLogin', found.role);
     localStorage.setItem('usernameLogin', found.user);
     alert("Login Berhasil!");
-    window.location.href = "dashboard.html"; // arahkan ke dashboard yang kamu kirim tadi
+    window.location.href = "dashboard.html"; // ini file dashboard yang kamu kirim tadi
   } else {
     alert("Username atau Password salah!");
     turnstile.reset();
