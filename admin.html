@@ -1,49 +1,158 @@
 <!DOCTYPE html>
 <html lang="id">
-<head><meta charset="UTF-8"><title>Login OZZIEKOST</title>
-<style>body{font-family:Arial;background:#f4f4f4;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}.card{background:white;padding:30px;border-radius:8px;width:350px;text-align:center}input{width:93%;padding:10px;margin:8px 0}button{width:100%;padding:12px;background:#007bff;color:white;border:none;border-radius:5px;cursor:pointer}.cf-turnstile{display:flex;justify-content:center;margin:15px 0}</style>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - OZZIEKOST</title>
+<style>
+:root{--blue:#007bff;--green:#28a745;--red:#dc3545;--bg:#f0f2f5}
+body{font-family:Arial;margin:0;background:var(--bg)}header{background:var(--blue);color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
+.container{max-width:1100px;margin:auto;padding:20px}.card{background:#fff;padding:18px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:18px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}.tab{padding:10px 16px;background:#ddd;border-radius:20px;cursor:pointer}.tab.active{background:var(--blue);color:#fff}
+table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #ddd;padding:8px;font-size:14px}th{background:var(--blue);color:#fff}
+input,select{padding:8px;margin:4px;border:1px solid #ccc;border-radius:6px}button{padding:7px 12px;border:none;border-radius:6px;cursor:pointer;color:#fff}
+.btn-blue{background:var(--blue)}.btn-green{background:var(--green)}.btn-red{background:var(--red)}.btn-gray{background:#6c757d}
+.badge{padding:3px 8px;border-radius:10px;font-size:12px;color:#fff}.aktif{background:var(--green)}.nonaktif{background:var(--red)}.pending{background:orange}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.stat{padding:15px;text-align:center}.stat h2{margin:5px 0}
+</style>
 </head>
 <body>
-<div class="card">
-<h2 style="color:#007bff">Login OZZIEKOST</h2>
-<form id="loginForm"><input type="text" id="username" placeholder="Username" required><input type="password" id="password" placeholder="Password" required><div class="cf-turnstile" data-sitekey="0x4AAAAAAEWi7VyX_qtLolIN"></div><button type="submit">Login</button></form>
-<p><a href="#">Daftar Jadi Calon Resident</a> | <a href="#">Lupa Password/PIN?</a></p>
+<header><b>OZZIEKOST ADMIN</b><div><span id="userInfo"></span> <button class="btn-gray" onclick="logout()">Logout</button></div></header>
+<div class="container">
+<div class="grid"><div class="card stat"><h2 id="totalRes">0</h2><small>Total Resident</small></div><div class="card stat"><h2 id="totalKamar">12</h2><small>Total Kamar</small></div><div class="card stat"><h2 id="totalBayar">0</h2><small>Lunas Bulan Ini</small></div><div class="card stat"><h2 id="totalMaint">0</h2><small>Maintenance Pending</small></div></div>
+
+<div class="tabs">
+<div class="tab active" onclick="openTab('resident')">Resident & Kamar</div>
+<div class="tab" onclick="openTab('pembayaran')">Laporan Pembayaran</div>
+<div class="tab" onclick="openTab('maintenance')">Maintenance Report</div>
 </div>
+
+<!-- TAB RESIDENT -->
+<div id="tab-resident" class="card">
+<h3>List Resident OZZIEKOST</h3>
+<div style="margin:10px 0">
+<input id="rNama" placeholder="Nama Lengkap"><input id="rKost" placeholder="Nama Kost (ex: Ozzie Kost A)"><input id="rKamar" placeholder="Kamar (ex: A-01)"><select id="rStatus"><option value="Aktif">Aktif</option><option value="Non-Aktif">Non-Aktif</option><option value="Calon">Calon</option></select>
+<input id="rUser" placeholder="Username login"><input id="rPass" placeholder="Password">
+<button class="btn-blue" onclick="addResident()">Tambah Resident</button>
+</div>
+<table><thead><tr><th>Nama</th><th>Kost</th><th>Kamar</th><th>Status</th><th>Username</th><th>Aksi</th></tr></thead><tbody id="resTable"></tbody></table>
+</div>
+
+<!-- TAB PEMBAYARAN -->
+<div id="tab-pembayaran" class="card" style="display:none">
+<h3>Laporan Pembayaran - Update otomatis saat tambah/hapus resident</h3>
+<div style="margin:10px 0">
+<select id="pResident"></select><input type="month" id="pBulan"><input id="pJumlah" type="number" placeholder="Jumlah Rp"><select id="pStatus"><option value="Lunas">Lunas</option><option value="Belum">Belum</option><option value="Pending">Pending</option></select>
+<button class="btn-green" onclick="addPayment()">Tambah Pembayaran</button>
+</div>
+<table><thead><tr><th>Nama</th><th>Kamar</th><th>Bulan</th><th>Jumlah</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="payTable"></tbody></table>
+</div>
+
+<!-- TAB MAINTENANCE -->
+<div id="tab-maintenance" class="card" style="display:none">
+<h3>Maintenance Report</h3>
+<div style="margin:10px 0">
+<select id="mKamar"></select><input id="mIssue" placeholder="Keluhan (ex: AC bocor)"><select id="mStatus"><option value="Pending">Pending</option><option value="Proses">Proses</option><option value="Selesai">Selesai</option></select>
+<button class="btn-blue" onclick="addMaint()">Lapor</button>
+</div>
+<table><thead><tr><th>Kamar</th><th>Keluhan</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody id="maintTable"></tbody></table>
+</div>
+</div>
+
 <script>
-document.getElementById('loginForm').addEventListener('submit', async function(e){
- e.preventDefault();
- const user = document.getElementById('username').value.trim().toLowerCase();
- const pass = document.getElementById('password').value;
- const token = turnstile.getResponse();
- if(!token){alert("Harap verifikasi!");return;}
- try{
-   const res = await fetch('https://ozzie-login-worker.samelanm.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
-   const r = await res.json();
-   if(!r.success){alert(r.message);turnstile.reset();return;}
- }catch(err){alert("Worker error: "+err.message);turnstile.reset();return;}
+// 1. AUTO CEK LOGIN ADMIN
+if(localStorage.getItem('userLogin')!=='admin'){ alert('Akses ditolak! Login admin dulu'); location.href='index.html'; }
+document.getElementById('userInfo').innerText = localStorage.getItem('usernameLogin')||'admin';
 
- let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
- // SELALU PASTIKAN ADMIN ADA
- if(!users.find(u=>u.user.toLowerCase()==='admin')){
-   users.push({user:'admin',pass:'admin123',password:'admin123',role:'admin',username:'admin'});
-   localStorage.setItem('ozzieUsers', JSON.stringify(users));
- }
+const LS_RES='ozzieResidents', LS_PAY='ozziePayments', LS_MAIN='ozzieMaint', LS_USER='ozzieUsers';
+function get(k){return JSON.parse(localStorage.getItem(k))||[]}
+function set(k,v){localStorage.setItem(k,JSON.stringify(v)); refreshAll();}
 
- let found = users.find(u=> (u.user||u.username||'').toLowerCase()===user && (u.pass===pass || u.password===pass));
- if(found){
-   localStorage.setItem('userLogin', found.role||'admin');
-   localStorage.setItem('usernameLogin', found.user||found.username);
-   alert("Login Berhasil sebagai "+(found.role||'admin'));
-   // REDIRECT YANG BENAR
-   if((found.role||'admin')==='admin'){ location.href="admin.html"; }
-   else { location.href="dashboard.html"; }
- } else {
-   alert("Username atau Password salah! Cek console (F12) untuk debug");
-   console.log("Input:",user,pass,"Users in storage:",users);
-   turnstile.reset();
- }
-});
+function refreshAll(){ renderRes(); renderPay(); renderMaint(); renderStats(); fillDropdowns(); }
+
+function renderStats(){
+ document.getElementById('totalRes').innerText=get(LS_RES).length;
+ document.getElementById('totalBayar').innerText=get(LS_PAY).filter(p=>p.status==='Lunas').length;
+ document.getElementById('totalMaint').innerText=get(LS_MAIN).filter(m=>m.status==='Pending').length;
+}
+function fillDropdowns(){
+ const res=get(LS_RES);
+ document.getElementById('pResident').innerHTML=res.map(r=>`<option value="${r.nama}">${r.nama} - ${r.kamar}</option>`).join('');
+ document.getElementById('mKamar').innerHTML=res.map(r=>`<option value="${r.kamar}">${r.kamar} - ${r.nama}</option>`).join('') || '<option value="A-01">A-01</option>';
+}
+
+function renderRes(){
+ const tb=document.getElementById('resTable'); tb.innerHTML='';
+ get(LS_RES).forEach((r,i)=>{
+  const cls=r.status==='Aktif'?'aktif':r.status==='Non-Aktif'?'nonaktif':'pending';
+  tb.innerHTML+=`<tr><td>${r.nama}</td><td>${r.kost}</td><td>${r.kamar}</td><td><span class="badge ${cls}">${r.status}</span></td><td>${r.username}</td><td><button class="btn-red" onclick="delResident(${i})">Hapus</button></td></tr>`;
+ });
+}
+function addResident(){
+ const nama=document.getElementById('rNama').value.trim(), kost=document.getElementById('rKost').value.trim(), kamar=document.getElementById('rKamar').value.trim(), status=document.getElementById('rStatus').value, username=document.getElementById('rUser').value.trim().toLowerCase(), pass=document.getElementById('rPass').value.trim();
+ if(!nama||!kamar||!username||!pass){alert('Lengkapi nama,kamar,username,password');return;}
+ let residents=get(LS_RES); let users=get(LS_USER);
+ if(residents.find(x=>x.kamar.toLowerCase()===kamar.toLowerCase())){alert('Kamar sudah terisi!');return;}
+ residents.push({nama,kost:kost||'Ozzie Kost',kamar,status,username,password:pass,pass:pass}); set(LS_RES,residents);
+ if(!users.find(u=>(u.user||u.username).toLowerCase()===username)){ users.push({user:username,username:username,pass:pass,password:pass,role:'resident'}); localStorage.setItem(LS_USER,JSON.stringify(users)); }
+ // auto buat pembayaran pending bulan ini
+ let pays=get(LS_PAY); const bulan=new Date().toISOString().slice(0,7);
+ pays.push({nama,kamar,bulan,bulanLabel:bulan,jumlah:0,status:'Belum'}); localStorage.setItem(LS_PAY,JSON.stringify(pays));
+ refreshAll();
+ document.getElementById('rNama').value='';document.getElementById('rKamar').value='';document.getElementById('rUser').value='';document.getElementById('rPass').value='';
+}
+function delResident(i){
+ if(!confirm('Hapus resident? Pembayaran & maintenance kamar ini juga terhapus'))return;
+ let residents=get(LS_RES); const kamar=residents[i].kamar, username=residents[i].username; residents.splice(i,1); localStorage.setItem(LS_RES,JSON.stringify(residents));
+ let users=get(LS_USER).filter(u=>(u.user||u.username).toLowerCase()!==username.toLowerCase()); localStorage.setItem(LS_USER,JSON.stringify(users));
+ let pays=get(LS_PAY).filter(p=>p.kamar!==kamar); localStorage.setItem(LS_PAY,JSON.stringify(pays));
+ let mains=get(LS_MAIN).filter(m=>m.kamar!==kamar); localStorage.setItem(LS_MAIN,JSON.stringify(mains));
+ refreshAll();
+}
+
+function renderPay(){
+ const tb=document.getElementById('payTable'); tb.innerHTML='';
+ get(LS_PAY).forEach((p,i)=>{
+  const cls=p.status==='Lunas'?'aktif':p.status==='Belum'?'nonaktif':'pending';
+  tb.innerHTML+=`<tr><td>${p.nama}</td><td>${p.kamar}</td><td>${p.bulan}</td><td>Rp ${Number(p.jumlah).toLocaleString('id-ID')}</td><td><span class="badge ${cls}">${p.status}</span> <select onchange="updatePayStatus(${i},this.value)"><option ${p.status==='Lunas'?'selected':''}>Lunas</option><option ${p.status==='Belum'?'selected':''}>Belum</option><option ${p.status==='Pending'?'selected':''}>Pending</option></select></td><td><button class="btn-red" onclick="delPay(${i})">Hapus</button></td></tr>`;
+ });
+}
+function addPayment(){
+ const nama=document.getElementById('pResident').value, bulan=document.getElementById('pBulan').value, jumlah=document.getElementById('pJumlah').value, status=document.getElementById('pStatus').value;
+ if(!nama||!bulan){alert('Pilih resident & bulan');return;}
+ const res=get(LS_RES).find(r=>r.nama===nama); const kamar=res?res.kamar:'-';
+ let pays=get(LS_PAY); pays.push({nama,kamar,bulan,jumlah:Number(jumlah)||0,status}); localStorage.setItem(LS_PAY,JSON.stringify(pays)); refreshAll();
+}
+function updatePayStatus(i,v){ let pays=get(LS_PAY); pays[i].status=v; localStorage.setItem(LS_PAY,JSON.stringify(pays)); refreshAll(); }
+function delPay(i){ let pays=get(LS_PAY); pays.splice(i,1); localStorage.setItem(LS_PAY,JSON.stringify(pays)); refreshAll(); }
+
+function renderMaint(){
+ const tb=document.getElementById('maintTable'); tb.innerHTML='';
+ get(LS_MAIN).forEach((m,i)=>{
+  const cls=m.status==='Selesai'?'aktif':m.status==='Proses'?'pending':'nonaktif';
+  tb.innerHTML+=`<tr><td>${m.kamar}</td><td>${m.issue}</td><td><span class="badge ${cls}">${m.status}</span> <select onchange="updateMaint(${i},this.value)"><option ${m.status==='Pending'?'selected':''}>Pending</option><option ${m.status==='Proses'?'selected':''}>Proses</option><option ${m.status==='Selesai'?'selected':''}>Selesai</option></select></td><td>${m.tgl}</td><td><button class="btn-red" onclick="delMaint(${i})">Hapus</button></td></tr>`;
+ });
+}
+function addMaint(){
+ const kamar=document.getElementById('mKamar').value, issue=document.getElementById('mIssue').value.trim(), status=document.getElementById('mStatus').value;
+ if(!issue){alert('Isi keluhan');return;}
+ let mains=get(LS_MAIN); mains.push({kamar,issue,status,tgl:new Date().toLocaleDateString('id-ID')}); localStorage.setItem(LS_MAIN,JSON.stringify(mains)); refreshAll(); document.getElementById('mIssue').value='';
+}
+function updateMaint(i,v){ let mains=get(LS_MAIN); mains[i].status=v; localStorage.setItem(LS_MAIN,JSON.stringify(mains)); refreshAll(); }
+function delMaint(i){ let mains=get(LS_MAIN); mains.splice(i,1); localStorage.setItem(LS_MAIN,JSON.stringify(mains)); refreshAll(); }
+
+function openTab(name){
+ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+ event.target.classList.add('active');
+ document.getElementById('tab-resident').style.display=name==='resident'?'block':'none';
+ document.getElementById('tab-pembayaran').style.display=name==='pembayaran'?'block':'none';
+ document.getElementById('tab-maintenance').style.display=name==='maintenance'?'block':'none';
+}
+function logout(){ localStorage.removeItem('userLogin'); localStorage.removeItem('usernameLogin'); location.href='index.html'; }
+
+// init data awal jika kosong
+if(get(LS_RES).length===0){ localStorage.setItem(LS_RES, JSON.stringify([{nama:'Budi - Contoh', kost:'Ozzie Kost A', kamar:'A-01', status:'Aktif', username:'budi', password:'budi123', pass:'budi123'}])); }
+refreshAll();
 </script>
 </body>
 </html>
