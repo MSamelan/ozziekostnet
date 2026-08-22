@@ -1,82 +1,48 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-<meta charset="UTF-8">
-<title>Login OZZIEKOST</title>
-<style>
-body{font-family:Arial;background:#f4f4f4;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
-.card{background:white;padding:30px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.1);width:350px;text-align:center}
-input{width:93%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:5px}
-button{width:100%;padding:12px;background:#007bff;color:white;border:none;border-radius:5px;cursor:pointer;font-size:16px;margin-top:10px}
-button:hover{background:#0056b3}
-.cf-turnstile{display:flex;justify-content:center;margin:15px 0}
-</style>
+<head><meta charset="UTF-8"><title>Login OZZIEKOST</title>
+<style>body{font-family:Arial;background:#f4f4f4;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}.card{background:white;padding:30px;border-radius:8px;width:350px;text-align:center}input{width:93%;padding:10px;margin:8px 0}button{width:100%;padding:12px;background:#007bff;color:white;border:none;border-radius:5px;cursor:pointer}.cf-turnstile{display:flex;justify-content:center;margin:15px 0}</style>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 <div class="card">
 <h2 style="color:#007bff">Login OZZIEKOST</h2>
-<form id="loginForm">
-  <input type="text" id="username" placeholder="Username" required>
-  <input type="password" id="password" placeholder="Password" required>
-  <div class="cf-turnstile" data-sitekey="0x4AAAAAAEWi7VyX_qtLolIN"></div>
-  <button type="submit">Login</button>
-</form>
-<p style="text-align:center;margin-top:15px;font-size:14px">
-  <a href="#">Daftar Jadi Calon Resident</a> | <a href="#">Lupa Password/PIN?</a>
-</p>
+<form id="loginForm"><input type="text" id="username" placeholder="Username" required><input type="password" id="password" placeholder="Password" required><div class="cf-turnstile" data-sitekey="0x4AAAAAAEWi7VyX_qtLolIN"></div><button type="submit">Login</button></form>
+<p><a href="#">Daftar Jadi Calon Resident</a> | <a href="#">Lupa Password/PIN?</a></p>
 </div>
-
 <script>
 document.getElementById('loginForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const user = document.getElementById('username').value.trim();
-  const pass = document.getElementById('password').value;
-  const token = turnstile.getResponse();
-  if(!token){ alert("Harap verifikasi manusia!"); return; }
+ e.preventDefault();
+ const user = document.getElementById('username').value.trim().toLowerCase();
+ const pass = document.getElementById('password').value;
+ const token = turnstile.getResponse();
+ if(!token){alert("Harap verifikasi!");return;}
+ try{
+   const res = await fetch('https://ozzie-login-worker.samelanm.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+   const r = await res.json();
+   if(!r.success){alert(r.message);turnstile.reset();return;}
+ }catch(err){alert("Worker error: "+err.message);turnstile.reset();return;}
 
-  // 1. Verify Turnstile via Worker
-  try {
-    const res = await fetch('https://ozzie-login-worker.samelanm.workers.dev', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ token: token })
-    });
-    const result = await res.json();
-    if(!result.success){
-      alert(result.message);
-      turnstile.reset();
-      return;
-    }
-  } catch(err){
-    alert("Worker error: " + err.message);
-    turnstile.reset();
-    return;
-  }
+ let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
+ // SELALU PASTIKAN ADMIN ADA
+ if(!users.find(u=>u.user.toLowerCase()==='admin')){
+   users.push({user:'admin',pass:'admin123',password:'admin123',role:'admin',username:'admin'});
+   localStorage.setItem('ozzieUsers', JSON.stringify(users));
+ }
 
-  // 2. Init default users if empty
-  let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
-  if(users.length === 0){
-    users = [
-      {user: 'admin', pass: 'admin123', password: 'admin123', role: 'admin'},
-      {user: 'resident', pass: 'resident123', password: 'resident123', role: 'resident'}
-    ];
-    localStorage.setItem('ozzieUsers', JSON.stringify(users));
-    console.log("Created default users", users);
-  }
-
-  // 3. Check login
-  let found = users.find(u => u.user === user && (u.pass === pass || u.password === pass));
-  
-  if(found){
-    localStorage.setItem('userLogin', found.role);
-    localStorage.setItem('usernameLogin', found.user);
-    alert("Login Berhasil sebagai " + found.role);
-    window.location.href = "dashboard.html";
-  } else {
-    alert("Username atau Password salah! \n\nAvailable users: " + users.map(u=>u.user+":"+ (u.pass||u.password)).join(", "));
-    turnstile.reset();
-  }
+ let found = users.find(u=> (u.user||u.username||'').toLowerCase()===user && (u.pass===pass || u.password===pass));
+ if(found){
+   localStorage.setItem('userLogin', found.role||'admin');
+   localStorage.setItem('usernameLogin', found.user||found.username);
+   alert("Login Berhasil sebagai "+(found.role||'admin'));
+   // REDIRECT YANG BENAR
+   if((found.role||'admin')==='admin'){ location.href="admin.html"; }
+   else { location.href="dashboard.html"; }
+ } else {
+   alert("Username atau Password salah! Cek console (F12) untuk debug");
+   console.log("Input:",user,pass,"Users in storage:",users);
+   turnstile.reset();
+ }
 });
 </script>
 </body>
