@@ -1,249 +1,83 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard Admin OZZIEKOST</title>
-  <style>
-    body { font-family: Arial; background: #f4f4f4; margin: 0; }
-.header { background: #007bff; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
-.sidebar { width: 250px; background: white; height: 100vh; position: fixed; padding-top: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; }
-.sidebar a { display: block; padding: 12px 20px; color: #333; text-decoration: none; cursor: pointer; }
-.sidebar a:hover,.sidebar a.active { background: #007bff; color: white; }
-.sidebar.submenu { padding-left: 35px; font-size: 14px; display: none; }
-.sidebar.submenu a { padding: 8px 20px; }
-.main { margin-left: 250px; padding: 20px; }
-.card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    button { padding: 10px 15px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    button.btn-primary { background: #007bff; }
-    button.btn-success { background: #28a745; }
-    button.btn-warning { background: #ffc107; color: #333; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    table th, table td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
-    table th { background: #f2f2f2; }
-    table select { padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
-   .alert { padding: 10px; border-radius: 5px; margin-bottom: 10px; }
-   .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-.status { padding: 5px 10px; border-radius: 5px; color: white; font-size: 12px; }
-.status.pending { background: #ffc107; color: #333; }
-.status.active { background: #28a745; }
-.status.waiting { background: #17a2b8; }
-.status.reject { background: #dc3545; }
-  </style>
+<meta charset="UTF-8">
+<title>Login OZZIEKOST</title>
+<style>
+body{font-family:Arial;background:#f4f4f4;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.card{background:white;padding:30px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.1);width:350px;text-align:center}
+input{width:93%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:5px}
+button{width:100%;padding:12px;background:#007bff;color:white;border:none;border-radius:5px;cursor:pointer;font-size:16px;margin-top:10px}
+button:hover{background:#0056b3}
+.cf-turnstile{display:flex;justify-content:center;margin:15px 0}
+</style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-  <div class="header">
-    <h2>Dashboard Admin OZZIEKOST</h2>
-    <div>
-      <span id="userInfo"></span>
-      <button onclick="logout()">Logout</button>
-    </div>
-  </div>
-
-  <div class="sidebar">
-    <a class="active" onclick="showMenu('dashboard', this)">📊 Dashboard</a>
-    <a onclick="toggleSubmenu('dataKostSub')"><span>🏠 Data Kost</span></a>
-    <div id="dataKostSub" class="submenu" style="display:block;">
-      <a onclick="showMenu('pendaftaran', this)">📝 Data Pendaftaran</a>
-      <a onclick="showMenu('penghuni', this)">👥 Data Resident</a>
-      <a onclick="showMenu('bayar', this)">💰 Data Pembayaran</a>
-    </div>
-    <a onclick="showMenu('maintenance', this)">🔧 Maintenance</a>
-  </div>
-
-  <div class="main">
-    <div id="dashboard" class="menu">
-      <h3>Selamat Datang, <span id="namaAdmin"></span>!</h3>
-      <div class="card">
-        <h4>Ringkasan</h4>
-        <p>Total Kamar: <b id="totalKamar">12</b></p>
-        <p>Penghuni Aktif: <b id="totalResident">0</b></p>
-        <p>Calon Pendaftar: <b id="totalPending">0</b></p>
-      </div>
-    </div>
-
-    <div id="pendaftaran" class="menu" style="display:none;">
-      <h3>📝 Data Pendaftaran Calon Resident</h3>
-      <div class="card">
-        <div id="rateLimitInfo" class="alert alert-warning" style="display:none;"></div>
-        <table id="tabelPendaftaran">
-          <thead><tr><th>Nama</th><th>Email</th><th>No HP</th><th>Tgl Lahir</th><th>Status</th><th>Aksi</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div id="penghuni" class="menu" style="display:none;">
-      <h3>👥 Data Resident</h3>
-      <div class="card">
-        <button id="btnTambahResident" class="btn-success" onclick="bukaFormDaftar()">+ Tambah Resident Baru</button>
-        <p id="rateLimitText" style="font-size:12px; color:#666;"></p>
-        <table id="tabelResident">
-          <thead><tr><th>Nama</th><th>Email</th><th>No Kamar</th><th>Tgl Lahir</th><th>Status</th><th>Aksi</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div id="bayar" class="menu" style="display:none;"><div class="card"><h3>💰 Data Pembayaran</h3></div></div>
-    <div id="maintenance" class="menu" style="display:none;"><div class="card"><h3>🔧 Data Maintenance</h3></div></div>
-  </div>
+<div class="card">
+<h2 style="color:#007bff">Login OZZIEKOST</h2>
+<form id="loginForm">
+  <input type="text" id="username" placeholder="Username" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <div class="cf-turnstile" data-sitekey="0x4AAAAAAEWi7VyX_qtLolIN"></div>
+  <button type="submit">Login</button>
+</form>
+<p style="text-align:center;margin-top:15px;font-size:14px">
+  <a href="#">Daftar Jadi Calon Resident</a> | <a href="#">Lupa Password/PIN?</a>
+</p>
+</div>
 
 <script>
-  const MAX_PER_DAY = 10; // BATAS 10 PER HARI
-  const role = localStorage.getItem('userLogin');
-  const username = localStorage.getItem('usernameLogin');
+document.getElementById('loginForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const user = document.getElementById('username').value.trim();
+  const pass = document.getElementById('password').value;
+  const token = turnstile.getResponse();
+  if(!token){ alert("Harap verifikasi manusia!"); return; }
 
-  if(role!== 'admin'){
-    alert("Akses ditolak! Silahkan login sebagai Admin dulu di index.html");
-    window.location.href = "index.html";
-  } else {
-    document.getElementById('userInfo').innerText = "Halo, " + username;
-    document.getElementById('namaAdmin').innerText = username;
-    window.addEventListener('DOMContentLoaded', () => { loadTabel(); cekRateLimit(); });
-  }
-
-  function logout(){
-    localStorage.removeItem('userLogin');
-    localStorage.removeItem('usernameLogin');
-    alert("Logout Berhasil");
-    window.location.href = "index.html";
-  }
-
-  function showMenu(menu, el){
-    document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
-    document.getElementById(menu).style.display = 'block';
-    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-    el.classList.add('active');
-    if(menu === 'pendaftaran' || menu === 'penghuni'){ loadTabel(); cekRateLimit(); }
-  }
-
-  function toggleSubmenu(id){
-    const sub = document.getElementById(id);
-    sub.style.display = sub.style.display === 'block'? 'none' : 'block';
-  }
-
-  // === RATE LIMITING FUNCTION ===
-  function cekRateLimit(){
-    const today = new Date().toISOString().split('T')[0];
-    let log = JSON.parse(localStorage.getItem('adminActionLog')) || {};
-    const adminKey = username; // batasi per akun admin
-    
-    if(!log[today]) log[today] = {};
-    if(!log[today][adminKey]) log[today][adminKey] = 0;
-
-    const count = log[today][adminKey];
-    const sisa = MAX_PER_DAY - count;
-
-    document.getElementById('rateLimitText').innerText = `Sisa kuota tambah resident hari ini: ${sisa} dari ${MAX_PER_DAY}`;
-    
-    const btn = document.getElementById('btnTambahResident');
-    if(count >= MAX_PER_DAY){
-        btn.disabled = true;
-        document.getElementById('rateLimitInfo').style.display = 'block';
-        document.getElementById('rateLimitInfo').innerText = `⚠️ Batas tambah resident 10x/hari sudah tercapai. Reset jam 00:00`;
-    } else {
-        btn.disabled = false;
-        document.getElementById('rateLimitInfo').style.display = 'none';
+  // 1. Verify Turnstile via Worker
+  try {
+    const res = await fetch('https://ozzie-login-worker.samelanm.workers.dev', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ token: token })
+    });
+    const result = await res.json();
+    if(!result.success){
+      alert(result.message);
+      turnstile.reset();
+      return;
     }
+  } catch(err){
+    alert("Worker error: " + err.message);
+    turnstile.reset();
+    return;
   }
 
-  function tambahRateLimit(){
-    const today = new Date().toISOString().split('T')[0];
-    let log = JSON.parse(localStorage.getItem('adminActionLog')) || {};
-    const adminKey = username;
-    if(!log[today]) log[today] = {};
-    if(!log[today][adminKey]) log[today][adminKey] = 0;
-    log[today][adminKey]++;
-    localStorage.setItem('adminActionLog', JSON.stringify(log));
-  }
-
-  function bukaFormDaftar(){
-    // CEK RATE LIMIT DULU SEBELUM PINDAH
-    const today = new Date().toISOString().split('T')[0];
-    let log = JSON.parse(localStorage.getItem('adminActionLog')) || {};
-    const adminKey = username;
-    if(!log[today]) log[today] = {};
-    if(!log[today][adminKey]) log[today][adminKey] = 0;
-
-    if(log[today][adminKey] >= MAX_PER_DAY){
-        alert(`Batas tambah resident 10x/hari sudah tercapai.`);
-        return;
-    }
-    
-    tambahRateLimit(); // +1
-    localStorage.setItem('modeDaftar', 'admin');
-    window.location.href = "index.html";
-  }
-
-  function updateStatus(email, newStatus){
-    let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
-    const userIndex = users.findIndex(u => u.email === email);
-    if(userIndex === -1) return;
-
-    if(newStatus === 'active'){
-        alert(`Calon ${users[userIndex].user} di-Approve. \nSilahkan klik "Tambah Resident Baru" untuk set Password & PIN dan Nomor Kamar`);
-    } else if(newStatus === 'waiting'){
-        users[userIndex].status = 'waiting';
-        alert(`${users[userIndex].user} dipindah ke Waiting List`);
-    } else if(newStatus === 'reject'){
-        if(confirm(`Yakin mau Reject ${users[userIndex].user}? Data akan dihapus`)){
-            users.splice(userIndex, 1);
-            alert("Data dihapus");
-        } else { return; }
-    }
+  // 2. Init default users if empty
+  let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
+  if(users.length === 0){
+    users = [
+      {user: 'admin', pass: 'admin123', password: 'admin123', role: 'admin'},
+      {user: 'resident', pass: 'resident123', password: 'resident123', role: 'resident'}
+    ];
     localStorage.setItem('ozzieUsers', JSON.stringify(users));
-    loadTabel();
+    console.log("Created default users", users);
   }
 
-  function loadTabel(){
-    try {
-        let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
-        const tbodyPendaftar = document.querySelector('#tabelPendaftaran tbody');
-        const tbodyResident = document.querySelector('#tabelResident tbody');
-        if(!tbodyPendaftar ||!tbodyResident) return;
-
-        tbodyPendaftar.innerHTML = '';
-        tbodyResident.innerHTML = '';
-
-        let totalResident = 0;
-        let totalPending = 0;
-
-        users.filter(u => u.role === 'resident').forEach(u => {
-            let statusClass = 'pending';
-            let statusText = 'Pending';
-            if(u.status === 'waiting'){ statusClass = 'waiting'; statusText = 'Waiting List'; }
-            if(u.status === 'active'){ statusClass = 'active'; statusText = 'Active'; }
-
-            if(u.status === 'pending' || u.status === 'waiting'){
-                totalPending++;
-                tbodyPendaftar.innerHTML += `<tr>
-                    <td>${u.user}</td><td>${u.email}</td><td>${u.hp || '-'}</td><td>${u.dob}</td>
-                    <td><span class="status ${statusClass}">${statusText}</span></td>
-                    <td>
-                        <select onchange="updateStatus('${u.email}', this.value)">
-                            <option value="">Pilih Aksi</option>
-                            <option value="active">Approve</option>
-                            <option value="waiting">Waiting List</option>
-                            <option value="reject">Reject</option>
-                        </select>
-                    </td>
-                </tr>`;
-            }
-            if(u.status === 'active'){
-                totalResident++;
-                tbodyResident.innerHTML += `<tr>
-                    <td>${u.user}</td><td>${u.email}</td><td>${u.room || '-'}</td><td>${u.dob}</td>
-                    <td><span class="status active">Active</span></td>
-                    <td>Edit</td>
-                </tr>`;
-            }
-        });
-
-        document.getElementById('totalResident').innerText = totalResident;
-        document.getElementById('totalPending').innerText = totalPending;
-    } catch(e){ console.log("Error loadTabel: ", e); }
+  // 3. Check login
+  let found = users.find(u => u.user === user && (u.pass === pass || u.password === pass));
+  
+  if(found){
+    localStorage.setItem('userLogin', found.role);
+    localStorage.setItem('usernameLogin', found.user);
+    alert("Login Berhasil sebagai " + found.role);
+    window.location.href = "dashboard.html";
+  } else {
+    alert("Username atau Password salah! \n\nAvailable users: " + users.map(u=>u.user+":"+ (u.pass||u.password)).join(", "));
+    turnstile.reset();
   }
+});
 </script>
 </body>
 </html>
