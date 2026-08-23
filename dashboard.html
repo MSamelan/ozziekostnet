@@ -170,7 +170,19 @@ function managerApprove(type,idx){
   save(); render(document.querySelector('.tab.active')?.innerText);
 }
 function updateMaint(idx,status){ db.maint[idx].status=status; save(); render(document.querySelector('.tab.active')?.innerText); }
-function preview(inp,id){ const r=new FileReader(); r.onload=e=>{const im=document.getElementById(id); im.src=e.target.result; im.style.display='block';}; if(inp.files[0]) r.readAsDataURL(inp.files[0]); }
+function preview(inp,id){
+  const r=new FileReader();
+  r.onload=e=>{
+    const im=document.getElementById(id);
+    im.src=e.target.result;
+    im.style.display='block';
+    im.style.width='80px';
+    im.style.height='80px';
+    im.style.objectFit='cover';
+    im.style.border='2px solid #D4AF37';
+  };
+  if(inp.files[0]) r.readAsDataURL(inp.files[0]);
+}
 function val(id){return document.getElementById(id)?.value||""}
 function logout(){ localStorage.removeItem("ozzie_session"); location.href="index.html"; }
 init();
