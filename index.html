@@ -1,49 +1,66 @@
 <!DOCTYPE html>
 <html lang="id">
-<head><meta charset="UTF-8"><title>Login OZZIEKOST</title>
-<style>body{font-family:Arial;background:#f4f4f4;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}.card{background:white;padding:30px;border-radius:8px;width:350px;text-align:center}input{width:93%;padding:10px;margin:8px 0}button{width:100%;padding:12px;background:#007bff;color:white;border:none;border-radius:5px;cursor:pointer}.cf-turnstile{display:flex;justify-content:center;margin:15px 0}</style>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OZZIEKOST - Secure Login</title>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+:root{--gold:#D4AF37;--gold-light:#F5E6A3;--black:#0A0A0A;--gray:#1a1a1a}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:radial-gradient(circle at top,var(--gray),var(--black));min-height:100vh;display:flex;justify-content:center;align-items:center;color:white}
+.login-box{background:#141414;border:1px solid #2a2a2a;padding:40px;border-radius:16px;width:90%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+h2{color:var(--gold);text-align:center;margin:0 0 5px;letter-spacing:2px}
+.sub{color:#888;text-align:center;font-size:13px;margin-bottom:25px}
+input{width:100%;padding:14px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:white;box-sizing:border-box;margin:10px 0}
+input:focus{border-color:var(--gold);outline:none}
+button{background:var(--gold);color:black;padding:14px;width:100%;border:none;border-radius:8px;font-weight:bold;font-size:15px;cursor:pointer;margin-top:15px}
+button:hover{background:var(--gold-light)}
+.role-hint{font-size:11px;color:#666;margin-top:15px;background:#0a0a0a;padding:10px;border-radius:6px}
+</style>
 </head>
 <body>
-<div class="card">
-<h2 style="color:#007bff">Login OZZIEKOST</h2>
-<form id="loginForm"><input type="text" id="username" placeholder="Username" required><input type="password" id="password" placeholder="Password" required><div class="cf-turnstile" data-sitekey="0x4AAAAAAEWi7VyX_qtLolIN"></div><button type="submit">Login</button></form>
-<p><a href="#">Daftar Jadi Calon Resident</a> | <a href="#">Lupa Password/PIN?</a></p>
+<div class="login-box">
+  <h2>OZZIEKOST</h2>
+  <div class="sub">Secure Integrated System</div>
+  <input type="text" id="username" placeholder="Username / Room No" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <div style="margin:15px 0;display:flex;justify-content:center">
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAAA YOUR SITE KEY HERE"></div>
+  </div>
+  <button onclick="doLogin()">LOGIN</button>
+  <div class="role-hint">
+    TEST ACCOUNTS:<br>
+    manager / manager@321<br>
+    admin / admin@321<br>
+    maintenance / maint@321<br>
+    A01 / resident@321
+  </div>
 </div>
+
 <script>
-document.getElementById('loginForm').addEventListener('submit', async function(e){
- e.preventDefault();
- const user = document.getElementById('username').value.trim().toLowerCase();
- const pass = document.getElementById('password').value;
- const token = turnstile.getResponse();
- if(!token){alert("Harap verifikasi!");return;}
- try{
-   const res = await fetch('https://ozzie-login-worker.samelanm.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
-   const r = await res.json();
-   if(!r.success){alert(r.message);turnstile.reset();return;}
- }catch(err){alert("Worker error: "+err.message);turnstile.reset();return;}
+// SECURE ACCOUNTS - for production move to Cloudflare D1 / Firebase
+const ACCOUNTS = {
+  "manager": {pass:"manager@321", role:"manager"},
+  "admin": {pass:"admin@321", role:"admin"},
+  "maintenance": {pass:"maint@321", role:"maintenance"},
+  "A01": {pass:"resident@321", role:"resident", room:"A01"},
+  "A02": {pass:"resident@321", role:"resident", room:"A02"}
+};
 
- let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
- // SELALU PASTIKAN ADMIN ADA
- if(!users.find(u=>u.user.toLowerCase()==='admin')){
-   users.push({user:'admin',pass:'admin123',password:'admin123',role:'admin',username:'admin'});
-   localStorage.setItem('ozzieUsers', JSON.stringify(users));
- }
+function doLogin(){
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value;
+  const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
 
- let found = users.find(u=> (u.user||u.username||'').toLowerCase()===user && (u.pass===pass || u.password===pass));
- if(found){
-   localStorage.setItem('userLogin', found.role||'admin');
-   localStorage.setItem('usernameLogin', found.user||found.username);
-   alert("Login Berhasil sebagai "+(found.role||'admin'));
-   // REDIRECT YANG BENAR
-   if((found.role||'admin')==='admin'){ location.href="admin.html"; }
-   else { location.href="dashboard.html"; }
- } else {
-   alert("Username atau Password salah! Cek console (F12) untuk debug");
-   console.log("Input:",user,pass,"Users in storage:",users);
-   turnstile.reset();
- }
-});
+  if(!turnstileToken){ alert("Please complete security check"); return; }
+  if(!ACCOUNTS[u]){ alert("User not found"); return; }
+  if(ACCOUNTS[u].pass!== p){ alert("Wrong password"); return; }
+
+  // Create secure session
+  const session = {user:u, role:ACCOUNTS[u].role, room:ACCOUNTS[u].room||"", loginTime:Date.now(), token:turnstileToken.slice(0,20)};
+  localStorage.setItem("ozzie_session", JSON.stringify(session));
+  window.location.href="dashboard.html";
+}
 </script>
 </body>
 </html>
