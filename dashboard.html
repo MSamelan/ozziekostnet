@@ -2,32 +2,27 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard - OZZIEKOST Integrated</title>
+<title>Dashboard - OZZIEKOST Fixed</title>
 <style>
-:root{--gold:#D4AF37;--gold2:#F5E6A3;--black:#0A0A0A;--card:#141414;--border:#2a2a2a}
-body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--black);color:white}
-.header{background:#111;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-.header b{color:var(--gold)}
-button{cursor:pointer}
-.logout{background:#222;color:white;border:1px solid #444;padding:8px 16px;border-radius:6px}
+:root{--gold:#D4AF37;--card:#141414;--border:#2a2a2a}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:#0a0a0a;color:white}
+.header{background:#111;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.header b{color:var(--gold)}.logout{background:#222;color:white;border:1px solid #444;padding:8px 16px;border-radius:6px;cursor:pointer}
 .tabs{display:flex;gap:8px;padding:15px 20px;background:#0f0f0f;overflow-x:auto;border-bottom:1px solid var(--border)}
 .tab{padding:10px 16px;background:#1e1e1e;border-radius:20px;cursor:pointer;white-space:nowrap;font-size:13px;border:1px solid #333}
 .tab.active{background:var(--gold);color:black;font-weight:bold}
 .content{padding:20px;max-width:1200px;margin:0 auto}
 .card{background:var(--card);padding:22px;border-radius:14px;border:1px solid var(--border);margin-bottom:18px}
 .card h3{color:var(--gold);margin:0 0 12px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){.grid2{grid-template-columns:1fr}}
 label{font-size:12px;color:#aaa;margin-top:8px;display:block}
 input,select,textarea{width:100%;padding:12px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:white;box-sizing:border-box;margin:6px 0 10px}
-input:focus,select:focus,textarea:focus{border-color:var(--gold);outline:none}
-.btn-gold{background:var(--gold);color:black;padding:11px 18px;border:none;border-radius:8px;font-weight:bold}
-.btn-dark{background:#222;color:white;border:1px solid #444;padding:8px 14px;border-radius:6px}
-table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left} th{color:var(--gold);font-size:11px;letter-spacing:1px}
-.badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:bold}
-.pending{background:#332a00;color:#ffcc00}.approved{background:#002e1a;color:#33ff99}.executed{background:#001a33;color:#4da6ff}.done{background:#1a3300;color:#88ff44}
-img.thumb{width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #333}
-.filter-bar{display:flex;gap:10px;margin-bottom:12px}
+.btn-gold{background:var(--gold);color:black;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
+.btn-process{background:#444;color:#aaa;padding:8px 14px;border-radius:6px;border:1px solid #555;cursor:not-allowed}
+table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left} th{color:var(--gold);font-size:11px}
+.badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:bold}.pending{background:#332a00;color:#ffcc00}.process{background:#332a00;color:#ffaa00;border:1px solid #ffaa00}.approved,.executed{background:#001a33;color:#4da6ff}.done{background:#1a3300;color:#88ff44}
+.thumb{width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #333}
+.due-box{background:#1a1500;border:1px solid var(--gold);padding:12px;border-radius:8px;margin:10px 0;color:var(--gold)}
 </style>
 </head>
 <body>
@@ -37,140 +32,132 @@ img.thumb{width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px s
 
 <script>
 const sess = JSON.parse(localStorage.getItem("ozzie_session")||"null");
-if(!sess){ location.href="index.html"; }
-document.getElementById('uLabel').innerText=sess.user;
-document.getElementById('rLabel').innerText=sess.role.toUpperCase();
+if(!sess) location.href="index.html";
+document.getElementById('uLabel').innerText=sess.user; document.getElementById('rLabel').innerText=sess.role.toUpperCase();
 document.getElementById('roomLabel').innerText=sess.room?"| Room "+sess.room:"";
-
 let db = JSON.parse(localStorage.getItem("ozzie_db_v2")||"{}");
 if(!db.profiles) db.profiles={}; if(!db.payments) db.payments=[]; if(!db.maint) db.maint=[];
 function save(){ localStorage.setItem("ozzie_db_v2", JSON.stringify(db)); }
 
-const ROLES_TABS = {
+// DATE HELPERS dd/mm/yyyy
+function fmt(d){ if(!d) return "-"; const dt=new Date(d); if(isNaN(dt)) return d; return String(dt.getDate()).padStart(2,'0')+"/"+String(dt.getMonth()+1).padStart(2,'0')+"/"+dt.getFullYear(); }
+function fmtMonthRange(monthStr){ if(!monthStr) return "-"; // monthStr = yyyy-mm
+  const [y,m]=monthStr.split("-").map(Number); const start=new Date(y,m-1,1); const end=new Date(y,m,0); return fmt(start)+" to "+fmt(end);
+}
+function addOneMonth(dateStr){ const d=new Date(dateStr); d.setMonth(d.getMonth()+1); return d.toISOString().split('T')[0]; }
+
+const TABS = {
   resident: ["My Profile","Upload Receipt","Request Maintenance","My History"],
-  admin: ["All Profiles","Payment Approvals","Maintenance Approvals","Monthly Worksheet"],
+  admin: ["All Profiles","Payment Process","Maintenance Process","Monthly Worksheet"],
   maintenance: ["Maintenance Worksheet"],
   manager: ["All Profiles","Finance & Payments","Maintenance Worksheet","Monthly Worksheet","Yearly Summary"]
 };
 
-function init(){ renderTabs(ROLES_TABS[sess.role][0]); const tDiv=document.getElementById('tabs'); tDiv.innerHTML=ROLES_TABS[sess.role].map((t,i)=>`<div class="tab ${i==0?'active':''}" onclick="renderTabs('${t}',this)">${t}</div>`).join(""); }
-function renderTabs(name, el){
+function init(){ render(TABS[sess.role][0]); document.getElementById('tabs').innerHTML=TABS[sess.role].map((t,i)=>`<div class="tab ${i==0?'active':''}" onclick="render('${t}',this)">${t}</div>`).join(""); }
+
+function render(name, el){
   if(el){ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); el.classList.add('active'); }
-  if(!name) name=ROLES_TABS[sess.role][0];
+  if(!name) name=TABS[sess.role][0];
   const c=document.getElementById('content');
 
-  // RESIDENT - PROFILE
   if(name=="My Profile"){
     const p=db.profiles[sess.room||sess.user]||{};
+    const nextDueText = p.due? `<div class="due-box">Next Due Date: <b>${fmt(p.due)}</b> (auto updated after payment approved)</div>` : `<div style="color:#666;font-size:12px">Due date will appear automatically after Admin Process + Manager Approve</div>`;
     c.innerHTML=`<div class="card"><h3>My Profile - ${sess.room||sess.user}</h3>
+    ${nextDueText}
     <div class="grid2">
-      <div><label>Full Name</label><input id="f_name" value="${p.fullName||''}" placeholder="Full Name"></div>
-      <div><label>NIK</label><input id="f_nik" value="${p.nik||''}" placeholder="3201..."></div>
-      <div><label>Address (Origin)</label><input id="f_addr" value="${p.addr||''}" placeholder="Alamat asal"></div>
-      <div><label>Phone</label><input id="f_phone" value="${p.phone||''}" placeholder="08..."></div>
-      <div><label>Emergency Contact</label><input id="f_emer" value="${p.emer||''}" placeholder="Name - Phone"></div>
-      <div><label>Move-in Date</label><input type="date" id="f_in" value="${p.moveIn||''}"></div>
-      <div><label>Next Due Date</label><input type="date" id="f_due" value="${p.due||''}"></div>
+      <div><label>Full Name</label><input id="f_name" value="${p.fullName||''}"></div>
+      <div><label>NIK</label><input id="f_nik" value="${p.nik||''}"></div>
+      <div><label>Address</label><input id="f_addr" value="${p.addr||''}"></div>
+      <div><label>Phone</label><input id="f_phone" value="${p.phone||''}"></div>
+      <div><label>Emergency Contact</label><input id="f_emer" value="${p.emer||''}"></div>
+      <div><label>Move-in Date</label><input type="date" id="f_in" value="${p.moveIn||''}"><small style="color:#888">Shown as: ${fmt(p.moveIn)}</small></div>
+      <div><label>Next Due Date (auto)</label><input type="date" id="f_due" value="${p.due||''}" readonly style="background:#1a1a1a"><small style="color:#888">Auto: ${fmt(p.due)}</small></div>
     </div>
-    <button class="btn-gold" style="margin-top:12px" onclick="saveProfile()">Save Profile</button>
-    <div style="font-size:11px;color:#666;margin-top:8px">Status: will go to Admin for approval</div>
-    </div>`;
+    <button class="btn-gold" style="margin-top:12px" onclick="saveProfile()">Save Profile</button></div>`;
   }
-  // RESIDENT - UPLOAD RECEIPT
   else if(name=="Upload Receipt"){
     c.innerHTML=`<div class="card"><h3>Upload Transfer Receipt</h3>
     <div class="grid2">
       <div><label>Month For</label><input type="month" id="p_month"></div>
       <div><label>Amount (Rp)</label><input type="number" id="p_amount" placeholder="2500000"></div>
-      <div><label>Date Transfer</label><input type="date" id="p_date"></div>
-      <div><label>Photo Receipt</label><input type="file" id="p_file" accept="image/*" onchange="preview(this,'prev')"><img id="prev" style="display:none;margin-top:8px" class="thumb"></div>
-    </div>
-    <button class="btn-gold" onclick="addPayment()">Submit Receipt</button></div>`;
+      <div><label>Date Transfer (Payment Date)</label><input type="date" id="p_date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div><label>Photo Receipt</label><input type="file" id="p_file" accept="image/*" onchange="preview(this,'prev')"><img id="prev" style="display:none" class="thumb" style="margin-top:8px"></div>
+    </div><button class="btn-gold" onclick="addPayment()">Submit</button></div>`;
   }
-  // RESIDENT - MAINTENANCE
   else if(name=="Request Maintenance"){
     c.innerHTML=`<div class="card"><h3>Request Maintenance</h3>
     <div class="grid2">
-      <div><label>Req. Date</label><input type="date" id="m_date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div><label>Req. Date</label><input type="date" id="m_date" value="${new Date().toISOString().split('T')[0]}"><small style="color:#888">Shown: ${fmt(new Date())}</small></div>
       <div><label>Type</label><select id="m_type"><option>AC</option><option>Water</option><option>Electric</option><option>General</option></select></div>
     </div>
-    <label>Description (Details of request)</label><textarea id="m_desc" rows="4" placeholder="Describe problem..."></textarea>
-    <label>Photo (optional)</label><input type="file" id="m_file" accept="image/*" onchange="preview(this,'mprev')"><img id="mprev" style="display:none;margin-top:8px" class="thumb">
+    <label>Description (Details of request)</label><textarea id="m_desc" rows="4"></textarea>
+    <label>Photo</label><input type="file" id="m_file" accept="image/*" onchange="preview(this,'mprev')"><img id="mprev" style="display:none" class="thumb">
     <button class="btn-gold" style="margin-top:10px" onclick="addMaint()">Submit Request</button></div>`;
   }
-  // HISTORY
   else if(name=="My History"){
     const pays=db.payments.filter(x=>x.room==(sess.room||sess.user));
-    const mts=db.maint.filter(x=>x.room==(sess.room||sess.user));
-    c.innerHTML=`<div class="card"><h3>My Payments</h3><table><tr><th>Month</th><th>Amount</th><th>Date</th><th>Status</th></tr>${pays.map(x=>`<tr><td>${x.month}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td>${x.date}</td><td><span class="badge ${x.status}">${x.status}</span></td></tr>`).join("")||'<tr><td colspan=4>No data</td></tr>'}</table></div>
-    <div class="card"><h3>My Maintenance</h3><table><tr><th>Date</th><th>Type</th><th>Desc</th><th>Status</th></tr>${mts.map(x=>`<tr><td>${x.date}</td><td>${x.type}</td><td>${x.desc}</td><td><span class="badge ${x.status}">${x.status}</span></td></tr>`).join("")||'<tr><td colspan=4>No data</td></tr>'}</table></div>`;
+    c.innerHTML=`<div class="card"><h3>My Payments</h3><table><tr><th>Pay Period</th><th>Payment Date</th><th>Amount</th><th>Status</th><th>Due Date</th></tr>${pays.map(x=>`<tr><td>${fmtMonthRange(x.month)}</td><td>${fmt(x.date)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${fmt(db.profiles[x.room]?.due)}</td></tr>`).join("")||'<tr><td colspan=5>No data</td></tr>'}</table></div>`;
   }
-  // ADMIN / MANAGER - ALL PROFILES
   else if(name=="All Profiles"){
-    const rows=Object.keys(db.profiles).map(room=>{const p=db.profiles[room]; return `<tr><td>${room}</td><td>${p.fullName||'-'}</td><td>${p.nik||'-'}</td><td>${p.phone||'-'}</td><td>${p.moveIn||'-'}</td><td>${p.due||'-'}</td></tr>`}).join("");
-    c.innerHTML=`<div class="card"><h3>All Resident Profiles</h3><table><tr><th>Room</th><th>Name</th><th>NIK</th><th>Phone</th><th>Move-in</th><th>Due</th></tr>${rows||'<tr><td colspan=6>No profiles yet</td></tr>'}</table></div>`;
+    const rows=Object.keys(db.profiles).map(r=>{const p=db.profiles[r]; return `<tr><td>${r}</td><td>${p.fullName||'-'}</td><td>${p.phone||'-'}</td><td>${fmt(p.moveIn)}</td><td><b style="color:#D4AF37">${fmt(p.due)}</b></td></tr>`}).join("");
+    c.innerHTML=`<div class="card"><h3>All Profiles - Due Date Auto</h3><table><tr><th>Room</th><th>Name</th><th>Phone</th><th>Move-in (dd/mm/yyyy)</th><th>Next Due (dd/mm/yyyy)</th></tr>${rows||'<tr><td colspan=5>No profiles</td></tr>'}</table></div>`;
   }
-  // ADMIN - PAYMENT APPROVALS & MANAGER - FINANCE
-  else if(name=="Payment Approvals"||name=="Finance & Payments"){
-    let filtered=db.payments; let total=0; filtered.forEach(x=>{if(x.status=='executed') total+=Number(x.amount||0)});
-    c.innerHTML=`<div class="card"><h3>${name} ${sess.role=='manager'?'- Total Executed: Rp '+total.toLocaleString():''}</h3>
-    <table><tr><th>Room</th><th>Month</th><th>Amount</th><th>Receipt</th><th>Status</th><th>Action</th></tr>
-    ${filtered.map((x,i)=>`<tr><td>${x.room}</td><td>${x.month}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${getActionBtn('payment',i,x.status)}</td></tr>`).join("")||'<tr><td colspan=6>No payments</td></tr>'}
-    </table></div>`;
+  else if(name=="Payment Process"){
+    c.innerHTML=`<div class="card"><h3>Payment Process (Admin)</h3>
+    <table><tr><th>Room</th><th>Payment Date</th><th>Pay Period</th><th>Amount</th><th>Receipt</th><th>Status</th><th>Action</th></tr>
+    ${db.payments.map((x,i)=>`<tr><td>${x.room}</td><td>${fmt(x.date)}</td><td>${fmtMonthRange(x.month)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='pending'?`<button class="btn-gold" onclick="adminProcess('payment',${i})">Process</button>`:`<button class="btn-process" disabled>Processed</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table>
+    <div style="font-size:11px;color:#888;margin-top:8px">Admin Process → status = process → Manager will Approve</div></div>`;
   }
-  // MAINTENANCE WORKSHEET
-  else if(name=="Maintenance Worksheet"||name=="Maintenance Approvals"){
-    c.innerHTML=`<div class="card"><h3>Maintenance Worksheet</h3><table><tr><th>Date</th><th>Room</th><th>Type</th><th>Description</th><th>Photo</th><th>Status</th><th>Follow-up</th></tr>
-    ${db.maint.map((x,i)=>`<tr><td>${x.date}</td><td>${x.room}</td><td>${x.type}</td><td>${x.desc}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${getActionBtn('maint',i,x.status)}</td></tr>`).join("")||'<tr><td colspan=7>No maintenance</td></tr>'}
-    </table></div>`;
+  else if(name=="Finance & Payments"){
+    let total=db.payments.filter(p=>p.status=='executed').reduce((s,x)=>s+Number(x.amount||0),0);
+    c.innerHTML=`<div class="card"><h3>Finance & Payments - Total Executed Rp ${total.toLocaleString()}</h3>
+    <table><tr><th>Room</th><th>Payment Date</th><th>Pay Period</th><th>Amount</th><th>Receipt</th><th>Status</th><th>Action</th></tr>
+    ${db.payments.map((x,i)=>`<tr><td>${x.room}</td><td>${fmt(x.date)}</td><td>${fmtMonthRange(x.month)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='process'?`<button class="btn-gold" onclick="managerApprove('payment',${i})">Approve</button>`:`<button class="btn-process" disabled>${x.status}</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`;
   }
-  // MONTHLY / YEARLY
+  else if(name=="Maintenance Process"||name=="Maintenance Worksheet"){
+    c.innerHTML=`<div class="card"><h3>${name}</h3><table><tr><th>Req. Date</th><th>Room</th><th>Type</th><th>Description</th><th>Photo</th><th>Status</th><th>Action</th></tr>
+    ${db.maint.map((x,i)=>`<tr><td>${fmt(x.date)}</td><td>${x.room}</td><td>${x.type}</td><td>${x.desc}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${actionMaint(x,i)}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`;
+  }
   else if(name=="Monthly Worksheet"||name=="Yearly Summary"){
-    const isYearly=name.includes("Yearly");
+    const isYear=name.includes("Yearly");
     c.innerHTML=`<div class="card"><h3>${name}</h3>
-    <div class="filter-bar"><input type="month" id="filterMonth" onchange="renderTabs('${name}')" value="${new Date().toISOString().slice(0,7)}" ${isYearly?'style=display:none':''}><input type="number" id="filterYear" placeholder="Year e.g. 2026" value="${new Date().getFullYear()}" onchange="renderTabs('${name}')" ${!isYearly?'style=display:none':''}></div>
-    ${renderMonthlyTable(isYearly)}
-    </div>`;
+    <div style="display:flex;gap:10px"><input type="month" id="fM" value="${new Date().toISOString().slice(0,7)}" ${isYear?'style=display:none':''}><input type="number" id="fY" value="${new Date().getFullYear()}" ${!isYear?'style=display:none':''}></div>
+    <div style="margin-top:12px">${renderWS(isYear)}</div></div>`;
   }
 }
-
-function getActionBtn(type,idx,status){
-  if(sess.role=='admin' && status=='pending') return `<button class="btn-gold" onclick="updateStatus('${type}',${idx},'approved')">Approve</button>`;
-  if(sess.role=='manager' && status=='approved') return `<button class="btn-gold" onclick="updateStatus('${type}',${idx},'executed')">Execute</button>`;
-  if(sess.role=='maintenance' && type=='maint' && status!='done') return `<button class="btn-dark" onclick="updateStatus('${type}',${idx},'done')">Mark Done</button>`;
-  if(sess.role=='manager' && type=='maint' && status=='done') return `<span style="color:#88ff44">Done</span>`;
-  return `<span style="color:#666">${status}</span>`;
+function actionMaint(x,i){
+  if(sess.role=='admin' && x.status=='pending') return `<button class="btn-gold" onclick="adminProcess('maint',${i})">Process</button>`;
+  if(sess.role=='admin' && x.status=='process') return `<button class="btn-process" disabled>Processed</button>`;
+  if(sess.role=='manager' && x.status=='process') return `<button class="btn-gold" onclick="managerApprove('maint',${i})">Approve</button>`;
+  if(sess.role=='maintenance' && (x.status=='process' || x.status=='approved')) return `<button class="btn-gold" onclick="updateMaint(${i},'done')">Mark Done</button>`;
+  if(x.status=='done' || x.status=='executed') return `<button class="btn-process" disabled>Done</button>`;
+  return `<span style="color:#666">${x.status}</span>`;
 }
-function renderMonthlyTable(isYearly){
-  const mVal=document.getElementById('filterMonth')?.value||new Date().toISOString().slice(0,7);
-  const yVal=document.getElementById('filterYear')?.value||new Date().getFullYear();
-  let pays=db.payments.filter(p=> isYearly? p.month?.startsWith(yVal): p.month==mVal);
+function renderWS(isYear){
+  const mVal=document.getElementById('fM')?.value; const yVal=document.getElementById('fY')?.value;
+  let pays=db.payments.filter(p=> isYear? p.month?.startsWith(yVal): p.month==mVal);
   let total=pays.filter(p=>p.status=='executed').reduce((s,x)=>s+Number(x.amount||0),0);
-  let mts=db.maint.filter(m=> isYearly? m.date?.startsWith(yVal): m.date?.startsWith(mVal));
-  return `<h4 style="color:#aaa">Payments (${pays.length}) - Total Executed Rp ${total.toLocaleString()}</h4><table><tr><th>Room</th><th>Month</th><th>Amount</th><th>Status</th></tr>${pays.map(x=>`<tr><td>${x.room}</td><td>${x.month}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td><span class="badge ${x.status}">${x.status}</span></td></tr>`).join("")||'<tr><td colspan=4>No data</td></tr>'}</table><br><h4 style="color:#aaa">Maintenance (${mts.length})</h4><table><tr><th>Room</th><th>Date</th><th>Type</th><th>Status</th></tr>${mts.map(x=>`<tr><td>${x.room}</td><td>${x.date}</td><td>${x.type}</td><td><span class="badge ${x.status}">${x.status}</span></td></tr>`).join("")||'<tr><td colspan=4>No data</td></tr>'}</table>`;
+  return `<b>Payments Total Executed: Rp ${total.toLocaleString()}</b><table><tr><th>Room</th><th>Pay Period</th><th>Payment Date (dd/mm/yyyy)</th><th>Status</th></tr>${pays.map(x=>`<tr><td>${x.room}</td><td>${fmtMonthRange(x.month)}</td><td>${fmt(x.date)}</td><td><span class="badge ${x.status}">${x.status}</span></td></tr>`).join("")||'<tr><td colspan=4>No data</td></tr>'}</table>`;
 }
-
-function saveProfile(){
-  const room=sess.room||sess.user;
-  db.profiles[room]={fullName:val('f_name'), nik:val('f_nik'), addr:val('f_addr'), phone:val('f_phone'), emer:val('f_emer'), moveIn:val('f_in'), due:val('f_due')};
-  save(); alert("Profile saved - waiting Admin approval");
+function saveProfile(){ const r=sess.room||sess.user; db.profiles[r]={...db.profiles[r], fullName:val('f_name'), nik:val('f_nik'), addr:val('f_addr'), phone:val('f_phone'), emer:val('f_emer'), moveIn:val('f_in'), due:val('f_due')||db.profiles[r]?.due}; save(); alert("Saved - Due: "+fmt(db.profiles[r].due)); }
+function addPayment(){ if(!val('p_amount')||!val('p_month')) return alert("Fill amount & month"); const img=document.getElementById('prev')?.src||""; db.payments.push({room:sess.room||sess.user, month:val('p_month'), amount:val('p_amount'), date:val('p_date'), img, status:'pending'}); save(); alert("Submitted"); render("My History"); }
+function addMaint(){ if(!val('m_desc')) return alert("Fill description"); const img=document.getElementById('mprev')?.src||""; db.maint.push({room:sess.room||sess.user, date:val('m_date'), type:val('m_type'), desc:val('m_desc'), img, status:'pending'}); save(); alert("Submitted"); }
+function adminProcess(type,idx){ if(type=='payment'){ db.payments[idx].status='process'; } else { db.maint[idx].status='process'; } save(); render(document.querySelector('.tab.active')?.innerText); }
+function managerApprove(type,idx){
+  if(type=='payment'){
+    db.payments[idx].status='executed';
+    const room=db.payments[idx].room; const monthStr=db.payments[idx].month;
+    // AUTO UPDATE DUE DATE
+    const [y,m]=monthStr.split("-").map(Number); let nextDue=new Date(y,m,1); // first day next month
+    const iso=nextDue.toISOString().split('T')[0];
+    if(!db.profiles[room]) db.profiles[room]={}; db.profiles[room].due=iso;
+    alert("Approved! Due date for "+room+" auto updated to "+fmt(iso));
+  } else { db.maint[idx].status='approved'; }
+  save(); render(document.querySelector('.tab.active')?.innerText);
 }
-function addPayment(){
-  const img=document.getElementById('prev')?.src||""; if(!val('p_amount')||!val('p_month')){alert("Fill amount & month");return}
-  db.payments.push({room:sess.room||sess.user, month:val('p_month'), amount:val('p_amount'), date:val('p_date')||new Date().toISOString().split('T')[0], img, status:'pending'});
-  save(); alert("Receipt submitted"); renderTabs("My History");
-}
-function addMaint(){
-  const img=document.getElementById('mprev')?.src||"";
-  if(!val('m_desc')){alert("Fill description");return}
-  db.maint.push({room:sess.room||sess.user, date:val('m_date'), type:val('m_type'), desc:val('m_desc'), img, status:'pending'});
-  save(); alert("Maintenance request submitted"); renderTabs("My History");
-}
-function updateStatus(type,idx,status){
-  if(type=='payment') db.payments[idx].status=status; else db.maint[idx].status=status;
-  save(); renderTabs(document.querySelector('.tab.active')?.innerText||"");
-}
-function preview(input, imgId){ const r=new FileReader(); r.onload=e=>{ const im=document.getElementById(imgId); im.src=e.target.result; im.style.display='block'; }; if(input.files[0]) r.readAsDataURL(input.files[0]); }
+function updateMaint(idx,status){ db.maint[idx].status=status; save(); render(document.querySelector('.tab.active')?.innerText); }
+function preview(inp,id){ const r=new FileReader(); r.onload=e=>{const im=document.getElementById(id); im.src=e.target.result; im.style.display='block';}; if(inp.files[0]) r.readAsDataURL(inp.files[0]); }
 function val(id){return document.getElementById(id)?.value||""}
 function logout(){ localStorage.removeItem("ozzie_session"); location.href="index.html"; }
 init();
