@@ -39,13 +39,26 @@ let db = JSON.parse(localStorage.getItem("ozzie_db_v2")||"{}");
 if(!db.profiles) db.profiles={}; if(!db.payments) db.payments=[]; if(!db.maint) db.maint=[];
 function save(){ localStorage.setItem("ozzie_db_v2", JSON.stringify(db)); }
 
-// DATE HELPERS dd/mm/yyyy
-function fmt(d){ if(!d) return "-"; const dt=new Date(d); if(isNaN(dt)) return d; return String(dt.getDate()).padStart(2,'0')+"/"+String(dt.getMonth()+1).padStart(2,'0')+"/"+dt.getFullYear(); }
-function fmtMonthRange(monthStr){ if(!monthStr) return "-"; // monthStr = yyyy-mm
-  const [y,m]=monthStr.split("-").map(Number); const start=new Date(y,m-1,1); const end=new Date(y,m,0); return fmt(start)+" to "+fmt(end);
+// DATE HELPERS - ALWAYS dd/mm/yyyy 4 digit year
+function fmt(d){
+  if(!d) return "-";
+  let dt;
+  // if already dd/mm/yyyy, return as is
+  if(typeof d === 'string' && d.includes('/')) return d.length <= 8? d.replace(/(\d+)\/(\d+)\/(\d+)/, (m,dd,mm,yy)=>{
+    let yyyy = yy.length==2? (Number(yy)>50?'19'+yy:'20'+yy) : yy;
+    return dd.padStart(2,'0')+'/'+mm.padStart(2,'0')+'/'+yyyy;
+  }) : d;
+  dt = new Date(d);
+  if(isNaN(dt)) return d;
+  return String(dt.getDate()).padStart(2,'0')+"/"+String(dt.getMonth()+1).padStart(2,'0')+"/"+dt.getFullYear();
 }
-function addOneMonth(dateStr){ const d=new Date(dateStr); d.setMonth(d.getMonth()+1); return d.toISOString().split('T')[0]; }
-
+function fmtMonthRange(monthStr){
+  if(!monthStr ||!monthStr.includes('-')) return "-";
+  const [y,m]=monthStr.split("-").map(Number);
+  const start=new Date(y,m-1,1);
+  const end=new Date(y,m,0);
+  return fmt(start)+" to "+fmt(end);
+}
 const TABS = {
   resident: ["My Profile","Upload Receipt","Request Maintenance","My History"],
   admin: ["All Profiles","Payment Process","Maintenance Process","Monthly Worksheet"],
