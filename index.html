@@ -26,7 +26,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
  let users = JSON.parse(localStorage.getItem('ozzieUsers')) || [];
  // SELALU PASTIKAN ADMIN ADA
  if(!users.find(u=>u.user.toLowerCase()==='admin')){
-   users.push({user:'admin',pass:'admintest123',password:'admintest123',role:'admin',username:'admin'});
+   users.push({user:'admin',pass:'admin123',password:'admin123',role:'admin',username:'admin'});
    localStorage.setItem('ozzieUsers', JSON.stringify(users));
  }
 
