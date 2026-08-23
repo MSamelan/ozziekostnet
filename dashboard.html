@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard - OZZIEKOST Fixed</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard - OZZIEKOST Final Flow</title>
 <style>
 :root{--gold:#D4AF37;--card:#141414;--border:#2a2a2a}
 body{margin:0;font-family:'Segoe UI',sans-serif;background:#0a0a0a;color:white}
-.header{background:#111;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.header{background:#111;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0}
 .header b{color:var(--gold)}.logout{background:#222;color:white;border:1px solid #444;padding:8px 16px;border-radius:6px;cursor:pointer}
 .tabs{display:flex;gap:8px;padding:15px 20px;background:#0f0f0f;overflow-x:auto;border-bottom:1px solid var(--border)}
 .tab{padding:10px 16px;background:#1e1e1e;border-radius:20px;cursor:pointer;white-space:nowrap;font-size:13px;border:1px solid #333}
@@ -17,174 +17,69 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:#0a0a0a;color:white}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){.grid2{grid-template-columns:1fr}}
 label{font-size:12px;color:#aaa;margin-top:8px;display:block}
 input,select,textarea{width:100%;padding:12px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:white;box-sizing:border-box;margin:6px 0 10px}
-.btn-gold{background:var(--gold);color:black;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
-.btn-process{background:#444;color:#aaa;padding:8px 14px;border-radius:6px;border:1px solid #555;cursor:not-allowed}
-table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left} th{color:var(--gold);font-size:11px}
-.badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:bold}.pending{background:#332a00;color:#ffcc00}.process{background:#332a00;color:#ffaa00;border:1px solid #ffaa00}.approved,.executed{background:#001a33;color:#4da6ff}.done{background:#1a3300;color:#88ff44}
+.btn-gold{background:var(--gold);color:black;padding:9px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
+.btn-grey{background:#2a2a2a;color:#777;padding:8px 14px;border-radius:6px;border:1px solid #444;cursor:not-allowed}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left}th{color:var(--gold);font-size:11px}
+.badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:bold}.pending{background:#332a00;color:#ffcc00}.process{background:#332a00;color:#ffaa00;border:1px solid #ffaa00}.approved{background:#001a33;color:#4da6ff}.executed{background:#002e1a;color:#33ff99}.done{background:#1a3300;color:#88ff44}
 .thumb{width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #333}
-.due-box{background:#1a1500;border:1px solid var(--gold);padding:12px;border-radius:8px;margin:10px 0;color:var(--gold)}
 </style>
 </head>
 <body>
 <div class="header"><div>Welcome <b id="uLabel"></b> | Role: <b id="rLabel"></b> <span id="roomLabel"></span></div><button class="logout" onclick="logout()">LOGOUT</button></div>
 <div class="tabs" id="tabs"></div>
 <div class="content" id="content"></div>
-
 <script>
-const sess = JSON.parse(localStorage.getItem("ozzie_session")||"null");
-if(!sess) location.href="index.html";
+const sess=JSON.parse(localStorage.getItem("ozzie_session")||"null"); if(!sess) location.href="index.html";
 document.getElementById('uLabel').innerText=sess.user; document.getElementById('rLabel').innerText=sess.role.toUpperCase();
 document.getElementById('roomLabel').innerText=sess.room?"| Room "+sess.room:"";
-let db = JSON.parse(localStorage.getItem("ozzie_db_v2")||"{}");
-if(!db.profiles) db.profiles={}; if(!db.payments) db.payments=[]; if(!db.maint) db.maint=[];
-function save(){ localStorage.setItem("ozzie_db_v2", JSON.stringify(db)); }
+let db=JSON.parse(localStorage.getItem("ozzie_db_v2")||"{}"); if(!db.profiles)db.profiles={};if(!db.payments)db.payments=[];if(!db.maint)db.maint=[];
+function save(){localStorage.setItem("ozzie_db_v2",JSON.stringify(db));}
+function fmt(d){if(!d)return"-"; const dt=new Date(d); if(isNaN(dt)){ if(typeof d==='string'&&d.includes('/')){const p=d.split('/'); if(p[2].length==2){p[2]=Number(p[2])>50?'19'+p[2]:'20'+p[2]; return p.join('/')} return d} return d;} return String(dt.getDate()).padStart(2,'0')+"/"+String(dt.getMonth()+1).padStart(2,'0')+"/"+dt.getFullYear();}
+function fmtMonthRange(ms){if(!ms||!ms.includes('-'))return"-"; const[y,m]=ms.split("-").map(Number); const s=new Date(y,m-1,1); const e=new Date(y,m,0); return fmt(s)+" to "+fmt(e);}
 
-// DATE HELPERS - ALWAYS dd/mm/yyyy 4 digit year
-function fmt(d){
-  if(!d) return "-";
-  let dt;
-  // if already dd/mm/yyyy, return as is
-  if(typeof d === 'string' && d.includes('/')) return d.length <= 8? d.replace(/(\d+)\/(\d+)\/(\d+)/, (m,dd,mm,yy)=>{
-    let yyyy = yy.length==2? (Number(yy)>50?'19'+yy:'20'+yy) : yy;
-    return dd.padStart(2,'0')+'/'+mm.padStart(2,'0')+'/'+yyyy;
-  }) : d;
-  dt = new Date(d);
-  if(isNaN(dt)) return d;
-  return String(dt.getDate()).padStart(2,'0')+"/"+String(dt.getMonth()+1).padStart(2,'0')+"/"+dt.getFullYear();
-}
-function fmtMonthRange(monthStr){
-  if(!monthStr ||!monthStr.includes('-')) return "-";
-  const [y,m]=monthStr.split("-").map(Number);
-  const start=new Date(y,m-1,1);
-  const end=new Date(y,m,0);
-  return fmt(start)+" to "+fmt(end);
-}
-const TABS = {
-  resident: ["My Profile","Upload Receipt","Request Maintenance","My History"],
-  admin: ["All Profiles","Payment Process","Maintenance Process","Monthly Worksheet"],
-  maintenance: ["Maintenance Worksheet"],
-  manager: ["All Profiles","Finance & Payments","Maintenance Worksheet","Monthly Worksheet","Yearly Summary"]
-};
+const TABS={resident:["My Profile","Upload Receipt","Request Maintenance","My History"],admin:["All Profiles","Payment Process","Maintenance Process","Monthly Worksheet"],maintenance:["Maintenance Worksheet"],manager:["All Profiles","Finance & Payments","Maintenance Worksheet","Monthly Worksheet","Yearly Summary"]};
 
 function init(){ render(TABS[sess.role][0]); document.getElementById('tabs').innerHTML=TABS[sess.role].map((t,i)=>`<div class="tab ${i==0?'active':''}" onclick="render('${t}',this)">${t}</div>`).join(""); }
 
-function render(name, el){
-  if(el){ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); el.classList.add('active'); }
-  if(!name) name=TABS[sess.role][0];
-  const c=document.getElementById('content');
+function render(name,el){
+ if(el){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); el.classList.add('active');}
+ if(!name)name=TABS[sess.role][0];
+ const c=document.getElementById('content');
 
-  if(name=="My Profile"){
-    const p=db.profiles[sess.room||sess.user]||{};
-    const nextDueText = p.due? `<div class="due-box">Next Due Date: <b>${fmt(p.due)}</b> (auto updated after payment approved)</div>` : `<div style="color:#666;font-size:12px">Due date will appear automatically after Admin Process + Manager Approve</div>`;
-    c.innerHTML=`<div class="card"><h3>My Profile - ${sess.room||sess.user}</h3>
-    ${nextDueText}
-    <div class="grid2">
-      <div><label>Full Name</label><input id="f_name" value="${p.fullName||''}"></div>
-      <div><label>NIK</label><input id="f_nik" value="${p.nik||''}"></div>
-      <div><label>Address</label><input id="f_addr" value="${p.addr||''}"></div>
-      <div><label>Phone</label><input id="f_phone" value="${p.phone||''}"></div>
-      <div><label>Emergency Contact</label><input id="f_emer" value="${p.emer||''}"></div>
-      <div><label>Move-in Date</label><input type="date" id="f_in" value="${p.moveIn||''}"><small style="color:#888">Shown as: ${fmt(p.moveIn)}</small></div>
-      <div><label>Next Due Date (auto)</label><input type="date" id="f_due" value="${p.due||''}" readonly style="background:#1a1a1a"><small style="color:#888">Auto: ${fmt(p.due)}</small></div>
-    </div>
-    <button class="btn-gold" style="margin-top:12px" onclick="saveProfile()">Save Profile</button></div>`;
-  }
-  else if(name=="Upload Receipt"){
-    c.innerHTML=`<div class="card"><h3>Upload Transfer Receipt</h3>
-    <div class="grid2">
-      <div><label>Month For</label><input type="month" id="p_month"></div>
-      <div><label>Amount (Rp)</label><input type="number" id="p_amount" placeholder="2500000"></div>
-      <div><label>Date Transfer (Payment Date)</label><input type="date" id="p_date" value="${new Date().toISOString().split('T')[0]}"></div>
-      <div><label>Photo Receipt</label><input type="file" id="p_file" accept="image/*" onchange="preview(this,'prev')"><img id="prev" style="display:none" class="thumb" style="margin-top:8px"></div>
-    </div><button class="btn-gold" onclick="addPayment()">Submit</button></div>`;
-  }
-  else if(name=="Request Maintenance"){
-    c.innerHTML=`<div class="card"><h3>Request Maintenance</h3>
-    <div class="grid2">
-      <div><label>Req. Date</label><input type="date" id="m_date" value="${new Date().toISOString().split('T')[0]}"><small style="color:#888">Shown: ${fmt(new Date())}</small></div>
-      <div><label>Type</label><select id="m_type"><option>AC</option><option>Water</option><option>Electric</option><option>General</option></select></div>
-    </div>
-    <label>Description (Details of request)</label><textarea id="m_desc" rows="4"></textarea>
-    <label>Photo</label><input type="file" id="m_file" accept="image/*" onchange="preview(this,'mprev')"><img id="mprev" style="display:none" class="thumb">
-    <button class="btn-gold" style="margin-top:10px" onclick="addMaint()">Submit Request</button></div>`;
-  }
-  else if(name=="My History"){
-    const pays=db.payments.filter(x=>x.room==(sess.room||sess.user));
-    c.innerHTML=`<div class="card"><h3>My Payments</h3><table><tr><th>Pay Period</th><th>Payment Date</th><th>Amount</th><th>Status</th><th>Due Date</th></tr>${pays.map(x=>`<tr><td>${fmtMonthRange(x.month)}</td><td>${fmt(x.date)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${fmt(db.profiles[x.room]?.due)}</td></tr>`).join("")||'<tr><td colspan=5>No data</td></tr>'}</table></div>`;
-  }
-  else if(name=="All Profiles"){
-    const rows=Object.keys(db.profiles).map(r=>{const p=db.profiles[r]; return `<tr><td>${r}</td><td>${p.fullName||'-'}</td><td>${p.phone||'-'}</td><td>${fmt(p.moveIn)}</td><td><b style="color:#D4AF37">${fmt(p.due)}</b></td></tr>`}).join("");
-    c.innerHTML=`<div class="card"><h3>All Profiles - Due Date Auto</h3><table><tr><th>Room</th><th>Name</th><th>Phone</th><th>Move-in (dd/mm/yyyy)</th><th>Next Due (dd/mm/yyyy)</th></tr>${rows||'<tr><td colspan=5>No profiles</td></tr>'}</table></div>`;
-  }
-  else if(name=="Payment Process"){
-    c.innerHTML=`<div class="card"><h3>Payment Process (Admin)</h3>
-    <table><tr><th>Room</th><th>Payment Date</th><th>Pay Period</th><th>Amount</th><th>Receipt</th><th>Status</th><th>Action</th></tr>
-    ${db.payments.map((x,i)=>`<tr><td>${x.room}</td><td>${fmt(x.date)}</td><td>${fmtMonthRange(x.month)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='pending'?`<button class="btn-gold" onclick="adminProcess('payment',${i})">Process</button>`:`<button class="btn-process" disabled>Processed</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table>
-    <div style="font-size:11px;color:#888;margin-top:8px">Admin Process → status = process → Manager will Approve</div></div>`;
-  }
-  else if(name=="Finance & Payments"){
-    let total=db.payments.filter(p=>p.status=='executed').reduce((s,x)=>s+Number(x.amount||0),0);
-    c.innerHTML=`<div class="card"><h3>Finance & Payments - Total Executed Rp ${total.toLocaleString()}</h3>
-    <table><tr><th>Room</th><th>Payment Date</th><th>Pay Period</th><th>Amount</th><th>Receipt</th><th>Status</th><th>Action</th></tr>
-    ${db.payments.map((x,i)=>`<tr><td>${x.room}</td><td>${fmt(x.date)}</td><td>${fmtMonthRange(x.month)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='process'?`<button class="btn-gold" onclick="managerApprove('payment',${i})">Approve</button>`:`<button class="btn-process" disabled>${x.status}</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`;
-  }
-  else if(name=="Maintenance Process"||name=="Maintenance Worksheet"){
-    c.innerHTML=`<div class="card"><h3>${name}</h3><table><tr><th>Req. Date</th><th>Room</th><th>Type</th><th>Description</th><th>Photo</th><th>Status</th><th>Action</th></tr>
-    ${db.maint.map((x,i)=>`<tr><td>${fmt(x.date)}</td><td>${x.room}</td><td>${x.type}</td><td>${x.desc}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${actionMaint(x,i)}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`;
-  }
-  else if(name=="Monthly Worksheet"||name=="Yearly Summary"){
-    const isYear=name.includes("Yearly");
-    c.innerHTML=`<div class="card"><h3>${name}</h3>
-    <div style="display:flex;gap:10px"><input type="month" id="fM" value="${new Date().toISOString().slice(0,7)}" ${isYear?'style=display:none':''}><input type="number" id="fY" value="${new Date().getFullYear()}" ${!isYear?'style=display:none':''}></div>
-    <div style="margin-top:12px">${renderWS(isYear)}</div></div>`;
-  }
+ if(name=="My Profile"){ const p=db.profiles[sess.room||sess.user]||{}; c.innerHTML=`<div class="card"><h3>My Profile - ${sess.room||sess.user}</h3><div style="background:#1a1500;border:1px solid #D4AF37;padding:10px;border-radius:8px;margin-bottom:10px;color:#D4AF37">Next Due Date: <b>${fmt(p.due)}</b> (auto after Manager Approve)</div><div class="grid2"><div><label>Full Name</label><input id="f_name" value="${p.fullName||''}"></div><div><label>NIK</label><input id="f_nik" value="${p.nik||''}"></div><div><label>Address</label><input id="f_addr" value="${p.addr||''}"></div><div><label>Phone</label><input id="f_phone" value="${p.phone||''}"></div><div><label>Emergency Contact</label><input id="f_emer" value="${p.emer||''}"></div><div><label>Move-in Date (dd/mm/yyyy)</label><input type="date" id="f_in" value="${p.moveIn||''}"><small>${fmt(p.moveIn)}</small></div><div><label>Next Due Date</label><input type="date" id="f_due" value="${p.due||''}" readonly style="background:#222"><small>${fmt(p.due)}</small></div></div><button class="btn-gold" style="margin-top:10px" onclick="saveProfile()">Save Profile</button></div>`; }
+ else if(name=="Upload Receipt"){ c.innerHTML=`<div class="card"><h3>Upload Receipt</h3><div class="grid2"><div><label>Month For</label><input type="month" id="p_month"></div><div><label>Amount</label><input type="number" id="p_amount"></div><div><label>Payment Date (dd/mm/yyyy)</label><input type="date" id="p_date" value="${new Date().toISOString().split('T')[0]}"></div><div><label>Photo Receipt</label><input type="file" id="p_file" accept="image/*" onchange="preview(this,'prev')"><img id="prev" style="display:none;margin-top:8px" class="thumb"></div></div><button class="btn-gold" onclick="addPayment()">Submit</button></div>`; }
+ else if(name=="Request Maintenance"){ c.innerHTML=`<div class="card"><h3>Request Maintenance</h3><div class="grid2"><div><label>Req. Date (dd/mm/yyyy)</label><input type="date" id="m_date" value="${new Date().toISOString().split('T')[0]}"></div><div><label>Type</label><select id="m_type"><option>AC</option><option>Water</option><option>Electric</option><option>General</option></select></div></div><label>Description</label><textarea id="m_desc" rows="3"></textarea><label>Photo</label><input type="file" id="m_file" accept="image/*" onchange="preview(this,'mprev')"><img id="mprev" style="display:none" class="thumb"><br><button class="btn-gold" style="margin-top:10px" onclick="addMaint()">Submit</button></div>`; }
+ else if(name=="My History"){ const pays=db.payments.filter(x=>x.room==(sess.room||sess.user)); c.innerHTML=`<div class="card"><h3>My History</h3><table><tr><th>Pay Period</th><th>Payment Date</th><th>Amount</th><th>Status</th><th>Due Date</th></tr>${pays.map(x=>`<tr><td>${fmtMonthRange(x.month)}</td><td>${fmt(x.date)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${fmt(db.profiles[x.room]?.due)}</td></tr>`).join("")||'<tr><td colspan=5>No data</td></tr>'}</table></div>`; }
+ else if(name=="All Profiles"){ const rows=Object.keys(db.profiles).map(r=>{const p=db.profiles[r]; return `<tr><td>${r}</td><td>${p.fullName||'-'}</td><td>${p.phone||'-'}</td><td>${fmt(p.moveIn)}</td><td style="color:#D4AF37;font-weight:bold">${fmt(p.due)}</td></tr>`}).join(""); c.innerHTML=`<div class="card"><h3>All Profiles - Due Date Auto</h3><table><tr><th>Room</th><th>Name</th><th>Phone</th><th>Move-in</th><th>Next Due dd/mm/yyyy</th></tr>${rows||'<tr><td colspan=5>No profiles</td></tr>'}</table></div>`; }
+ else if(name=="Payment Process"){ c.innerHTML=`<div class="card"><h3>Payment Process (Admin)</h3><table><tr><th>Room</th><th>Payment Date</th><th>Pay Period</th><th>Amount</th><th>Receipt</th><th>Status</th><th>Action</th></tr>${db.payments.map((x,i)=>`<tr><td>${x.room}</td><td>${fmt(x.date)}</td><td>${fmtMonthRange(x.month)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='pending'?`<button class="btn-gold" onclick="adminProcess('payment',${i})">Process</button>`:`<button class="btn-grey" disabled>Processed</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`; }
+ else if(name=="Finance & Payments"){ const total=db.payments.filter(p=>p.status=='executed').reduce((s,x)=>s+Number(x.amount||0),0); c.innerHTML=`<div class="card"><h3>Finance & Payments - Total Executed Rp ${total.toLocaleString()}</h3><table><tr><th>Room</th><th>Payment Date</th><th>Pay Period</th><th>Amount</th><th>Receipt</th><th>Status</th><th>Action</th></tr>${db.payments.map((x,i)=>`<tr><td>${x.room}</td><td>${fmt(x.date)}</td><td>${fmtMonthRange(x.month)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='process'?`<button class="btn-gold" onclick="managerApprove('payment',${i})">Approve</button>`:`<button class="btn-grey" disabled>${x.status}</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`; }
+ else if(name=="Maintenance Process"){ c.innerHTML=`<div class="card"><h3>Maintenance Process (Admin)</h3><table><tr><th>Req Date</th><th>Room</th><th>Type</th><th>Description</th><th>Photo</th><th>Status</th><th>Action</th></tr>${db.maint.map((x,i)=>`<tr><td>${fmt(x.date)}</td><td>${x.room}</td><td>${x.type}</td><td>${x.desc}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='pending'?`<button class="btn-gold" onclick="adminProcess('maint',${i})">Process</button>`:`<button class="btn-grey" disabled>Processed</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`; }
+ else if(name=="Maintenance Worksheet"){ c.innerHTML=`<div class="card"><h3>Maintenance Worksheet - ${sess.role}</h3><table><tr><th>Req Date</th><th>Room</th><th>Type</th><th>Description</th><th>Photo</th><th>Status</th><th>Action</th></tr>${db.maint.map((x,i)=>`<tr><td>${fmt(x.date)}</td><td>${x.room}</td><td>${x.type}</td><td>${x.desc}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${actionMaintenance(x,i)}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`; }
+ else if(name=="Monthly Worksheet"||name=="Yearly Summary"){ c.innerHTML=`<div class="card"><h3>${name}</h3>${renderWS(name.includes("Yearly"))}</div>`; }
 }
-function actionMaint(x,i){
-  if(sess.role=='admin' && x.status=='pending') return `<button class="btn-gold" onclick="adminProcess('maint',${i})">Process</button>`;
-  if(sess.role=='admin' && x.status=='process') return `<button class="btn-process" disabled>Processed</button>`;
+
+function actionMaintenance(x,i){
   if(sess.role=='manager' && x.status=='process') return `<button class="btn-gold" onclick="managerApprove('maint',${i})">Approve</button>`;
-  if(sess.role=='maintenance' && (x.status=='process' || x.status=='approved')) return `<button class="btn-gold" onclick="updateMaint(${i},'done')">Mark Done</button>`;
-  if(x.status=='done' || x.status=='executed') return `<button class="btn-process" disabled>Done</button>`;
+  if(sess.role=='maintenance' && (x.status=='approved' || x.status=='process')) return `<button class="btn-gold" onclick="doneMaint(${i})">Mark Done</button>`;
+  if(x.status=='done' || x.status=='executed') return `<button class="btn-grey" disabled>Done</button>`;
+  if(x.status=='process') return `<span style="color:#ffaa00">Waiting Manager Approve</span>`;
   return `<span style="color:#666">${x.status}</span>`;
 }
-function renderWS(isYear){
-  const mVal=document.getElementById('fM')?.value; const yVal=document.getElementById('fY')?.value;
-  let pays=db.payments.filter(p=> isYear? p.month?.startsWith(yVal): p.month==mVal);
-  let total=pays.filter(p=>p.status=='executed').reduce((s,x)=>s+Number(x.amount||0),0);
-  return `<b>Payments Total Executed: Rp ${total.toLocaleString()}</b><table><tr><th>Room</th><th>Pay Period</th><th>Payment Date (dd/mm/yyyy)</th><th>Status</th></tr>${pays.map(x=>`<tr><td>${x.room}</td><td>${fmtMonthRange(x.month)}</td><td>${fmt(x.date)}</td><td><span class="badge ${x.status}">${x.status}</span></td></tr>`).join("")||'<tr><td colspan=4>No data</td></tr>'}</table>`;
-}
-function saveProfile(){ const r=sess.room||sess.user; db.profiles[r]={...db.profiles[r], fullName:val('f_name'), nik:val('f_nik'), addr:val('f_addr'), phone:val('f_phone'), emer:val('f_emer'), moveIn:val('f_in'), due:val('f_due')||db.profiles[r]?.due}; save(); alert("Saved - Due: "+fmt(db.profiles[r].due)); }
-function addPayment(){ if(!val('p_amount')||!val('p_month')) return alert("Fill amount & month"); const img=document.getElementById('prev')?.src||""; db.payments.push({room:sess.room||sess.user, month:val('p_month'), amount:val('p_amount'), date:val('p_date'), img, status:'pending'}); save(); alert("Submitted"); render("My History"); }
-function addMaint(){ if(!val('m_desc')) return alert("Fill description"); const img=document.getElementById('mprev')?.src||""; db.maint.push({room:sess.room||sess.user, date:val('m_date'), type:val('m_type'), desc:val('m_desc'), img, status:'pending'}); save(); alert("Submitted"); }
-function adminProcess(type,idx){ if(type=='payment'){ db.payments[idx].status='process'; } else { db.maint[idx].status='process'; } save(); render(document.querySelector('.tab.active')?.innerText); }
+
+function renderWS(isYear){ return `Payments: ${db.payments.length} | Maintenance: ${db.maint.length}`; }
+function saveProfile(){ const r=sess.room||sess.user; db.profiles[r]={...db.profiles[r], fullName:val('f_name'), nik:val('f_nik'), addr:val('f_addr'), phone:val('f_phone'), emer:val('f_emer'), moveIn:val('f_in'), due:val('f_due')||db.profiles[r]?.due}; save(); alert("Saved Due: "+fmt(db.profiles[r].due)); }
+function addPayment(){ if(!val('p_amount')||!val('p_month')) return alert("Fill"); const img=document.getElementById('prev')?.src||""; db.payments.push({room:sess.room||sess.user, month:val('p_month'), amount:val('p_amount'), date:val('p_date'), img, status:'pending'}); save(); alert("Submitted"); }
+function addMaint(){ if(!val('m_desc')) return alert("Fill desc"); const img=document.getElementById('mprev')?.src||""; db.maint.push({room:sess.room||sess.user, date:val('m_date'), type:val('m_type'), desc:val('m_desc'), img, status:'pending'}); save(); alert("Submitted - will go to Admin Process"); }
+function adminProcess(type,idx){ if(type=='payment') db.payments[idx].status='process'; else db.maint[idx].status='process'; save(); render(document.querySelector('.tab.active').innerText); }
 function managerApprove(type,idx){
-  if(type=='payment'){
-    db.payments[idx].status='executed';
-    const room=db.payments[idx].room; const monthStr=db.payments[idx].month;
-    // AUTO UPDATE DUE DATE
-    const [y,m]=monthStr.split("-").map(Number); let nextDue=new Date(y,m,1); // first day next month
-    const iso=nextDue.toISOString().split('T')[0];
-    if(!db.profiles[room]) db.profiles[room]={}; db.profiles[room].due=iso;
-    alert("Approved! Due date for "+room+" auto updated to "+fmt(iso));
-  } else { db.maint[idx].status='approved'; }
-  save(); render(document.querySelector('.tab.active')?.innerText);
+  if(type=='payment'){ db.payments[idx].status='executed'; const room=db.payments[idx].room; const [y,m]=db.payments[idx].month.split("-").map(Number); const next=new Date(y,m,1); const iso=next.toISOString().split('T')[0]; if(!db.profiles[room])db.profiles[room]={}; db.profiles[room].due=iso; alert("Approved! Due for "+room+" -> "+fmt(iso)); }
+  else { db.maint[idx].status='approved'; }
+  save(); render(document.querySelector('.tab.active').innerText);
 }
-function updateMaint(idx,status){ db.maint[idx].status=status; save(); render(document.querySelector('.tab.active')?.innerText); }
-function preview(inp,id){
-  const r=new FileReader();
-  r.onload=e=>{
-    const im=document.getElementById(id);
-    im.src=e.target.result;
-    im.style.display='block';
-    im.style.width='80px';
-    im.style.height='80px';
-    im.style.objectFit='cover';
-    im.style.border='2px solid #D4AF37';
-  };
-  if(inp.files[0]) r.readAsDataURL(inp.files[0]);
-}
+function doneMaint(idx){ db.maint[idx].status='done'; save(); render(document.querySelector('.tab.active').innerText); }
+function preview(inp,id){ const r=new FileReader(); r.onload=e=>{const im=document.getElementById(id); im.src=e.target.result; im.style.display='block';}; if(inp.files[0]) r.readAsDataURL(inp.files[0]); }
 function val(id){return document.getElementById(id)?.value||""}
-function logout(){ localStorage.removeItem("ozzie_session"); location.href="index.html"; }
+function logout(){localStorage.removeItem("ozzie_session"); location.href="index.html";}
 init();
 </script>
 </body>
