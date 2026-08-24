@@ -1,73 +1,54 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OZZIEKOST - Secure Login</title>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
-:root{--gold:#D4AF37;--gold-light:#F5E6A3;--black:#0A0A0A;--gray:#1a1a1a}
-body{margin:0;font-family:'Segoe UI',sans-serif;background:radial-gradient(circle at top,var(--gray),var(--black));min-height:100vh;display:flex;justify-content:center;align-items:center;color:white}
-.login-box{background:#141414;border:1px solid #2a2a2a;padding:40px;border-radius:16px;width:90%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-h2{color:var(--gold);text-align:center;margin:0 0 5px;letter-spacing:2px}
-.sub{color:#888;text-align:center;font-size:13px;margin-bottom:25px}
-input{width:100%;padding:14px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:white;box-sizing:border-box;margin:10px 0}
+:root{--gold:#D4AF37;--black:#0A0A0A;--card:#141414;--border:#2a2a2a}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--black);font-family:'Segoe UI',sans-serif;color:white}
+.box{background:var(--card);padding:36px 28px;border-radius:18px;border:1px solid var(--border);width:90%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,0.8)}
+h1{color:var(--gold);text-align:center;letter-spacing:3px;margin:0 0 6px}
+.sub{color:#888;text-align:center;font-size:13px;margin-bottom:24px}
+input{width:100%;padding:14px;background:#0a0a0a;border:1px solid #333;border-radius:10px;color:white;box-sizing:border-box;margin:8px 0 12px}
 input:focus{border-color:var(--gold);outline:none}
-button{background:var(--gold);color:black;padding:14px;width:100%;border:none;border-radius:8px;font-weight:bold;font-size:15px;cursor:pointer;margin-top:15px}
-button:hover{background:var(--gold-light)}
-.role-hint{font-size:11px;color:#666;margin-top:15px;background:#0a0a0a;padding:10px;border-radius:6px}
+.btn{width:100%;padding:14px;background:var(--gold);color:black;border:none;border-radius:10px;font-weight:bold;font-size:15px;cursor:pointer;margin-top:10px}
+.btn:hover{background:#F5E6A3}
+.err{color:#ff6666;font-size:12px;text-align:center;margin-top:10px;display:none}
 </style>
 </head>
 <body>
-<div class="login-box">
-  <h2>OZZIEKOST</h2>
-  <div class="sub">Secure Integrated System</div>
-  <input type="text" id="username" placeholder="Username / Room No" required>
-  <input type="password" id="password" placeholder="Password" required>
-  <div style="margin:15px 0;display:flex;justify-content:center">
-   <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="dark"></div>
-  <button onclick="doLogin()">LOGIN</button>
-  <div class="role-hint">
-    TEST ACCOUNTS:<br>
-    manager / manager@321<br>
-    admin / admin@321<br>
-    maintenance / maint@321<br>
-    A01 / resident@321
-  </div>
+<div class="box">
+<h1>OZZIEKOST</h1>
+<div class="sub">Secure Integrated System</div>
+<input id="user" placeholder="Username / Room No" autocomplete="off">
+<input id="pass" type="password" placeholder="Password">
+<button class="btn" onclick="login()">LOGIN</button>
+<div id="err" class="err">Invalid username or password</div>
 </div>
 
 <script>
-// SECURE ACCOUNTS - for production move to Cloudflare D1 / Firebase
+// SECURE - No display of accounts in UI
 const ACCOUNTS = {
   "manager": {pass:"manager@321", role:"manager"},
   "admin": {pass:"admin@321", role:"admin"},
   "maintenance": {pass:"maint@321", role:"maintenance"},
   "A01": {pass:"resident@321", role:"resident", room:"A01"},
-  "A02": {pass:"resident@321", role:"resident", room:"A02"}
+  "A02": {pass:"resident@321", role:"resident", room:"A02"},
+  "A03": {pass:"resident@321", role:"resident", room:"A03"}
 };
 
-function doLogin(){
-  const u = document.getElementById('username').value.trim();
-  const p = document.getElementById('password').value;
-  const turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
-  const turnstileToken = turnstileInput? turnstileInput.value : "";
-
-  // For TEST key, we allow even if token is short during dev
-  if(!turnstileToken){
-    // still try to check widget exists
-    const widgetExists = document.querySelector('.cf-turnstile iframe');
-    if(!widgetExists){
-      alert("Security widget not loaded. Please refresh page and wait 3 seconds for the checkbox to appear.");
-      return;
-    }
+function login(){
+  const u=document.getElementById('user').value.trim();
+  const p=document.getElementById('pass').value.trim();
+  const acc=ACCOUNTS[u];
+  if(acc && acc.pass===p){
+    localStorage.setItem("ozzie_session", JSON.stringify({user:u, role:acc.role, room:acc.room||""}));
+    location.href="dashboard.html";
+  } else {
+    document.getElementById('err').style.display='block';
   }
-  if(!ACCOUNTS[u]){ alert("User not found"); return; }
-  if(ACCOUNTS[u].pass!== p){ alert("Wrong password"); return; }
-
-  const session = {user:u, role:ACCOUNTS[u].role, room:ACCOUNTS[u].room||"", loginTime:Date.now()};
-  localStorage.setItem("ozzie_session", JSON.stringify(session));
-  window.location.href="dashboard.html";
 }
+document.addEventListener('keypress', e=>{ if(e.key==='Enter') login(); });
 </script>
 </body>
 </html>
