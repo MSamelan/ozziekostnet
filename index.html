@@ -7,7 +7,7 @@
 body{
   margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
   font-family:'Segoe UI',sans-serif;
-  background: #7AC74F; /* BASE - your palm leaf colour */
+  background: #7ABD51; /* EXACT LEAF COLOUR FROM YOUR PHOTO */
 }
 .box{
   background:#141414;padding:36px 28px;border-radius:18px;
@@ -19,7 +19,6 @@ h1{color:#D4AF37;text-align:center;letter-spacing:3px;margin:0 0 6px;font-size:3
 input{width:100%;padding:14px;background:#0a0a0a;border:1px solid #333;border-radius:10px;color:white;box-sizing:border-box;margin:8px 0 12px}
 input:focus{border-color:#D4AF37;outline:none}
 .btn{width:100%;padding:14px;background:#D4AF37;color:black;border:none;border-radius:10px;font-weight:bold;font-size:15px;cursor:pointer;margin-top:10px}
-.btn:hover{background:#F5E6A3}
 .err{color:#ff6666;font-size:12px;text-align:center;margin-top:10px;display:none}
 </style>
 </head>
@@ -32,17 +31,14 @@ input:focus{border-color:#D4AF37;outline:none}
 <button class="btn" onclick="login()">LOGIN</button>
 <div id="err" class="err">Invalid login</div>
 </div>
-
 <script>
-// 🔴🔴🔴 EDITABLE PASSWORDS - ONLY YOU CAN CHANGE HERE 🔴🔴🔴
+// 🔴 EDITABLE PASSWORDS
 const SECURE_CONFIG = {
   manager: "manager@321",
   admin: "admin@321",
   maintenance: "maint@321",
   resident_default: "resident@321"
 };
-// END EDITABLE
-
 const ACCOUNTS = {
   "manager": {pass: SECURE_CONFIG.manager, role:"manager"},
   "admin": {pass: SECURE_CONFIG.admin, role:"admin"},
@@ -53,19 +49,15 @@ const ACCOUNTS = {
   "A04": {pass: SECURE_CONFIG.resident_default, role:"resident", room:"A04"},
   "A05": {pass: SECURE_CONFIG.resident_default, role:"resident", room:"A05"}
 };
-
 function login(){
   const u=document.getElementById('user').value.trim();
   const p=document.getElementById('pass').value.trim();
   const acc=ACCOUNTS[u];
   if(acc && acc.pass===p){
-    localStorage.setItem("ozzie_session", JSON.stringify({user:u, role:acc.role, room:acc.room||""}));
+    localStorage.setItem("ozzie_session", JSON.stringify({user:u, role:acc.role}));
     location.href="dashboard.html";
-  } else {
-    document.getElementById('err').style.display='block';
-  }
+  } else { document.getElementById('err').style.display='block'; }
 }
-document.addEventListener('keypress', e=>{ if(e.key==='Enter') login(); });
 </script>
 </body>
 </html>
