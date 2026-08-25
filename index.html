@@ -5,15 +5,32 @@
 <title>OZZIEKOST - Secure Login</title>
 <style>
 :root{--gold:#D4AF37;--black:#0A0A0A;--card:#141414;--border:#2a2a2a}
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--black);font-family:'Segoe UI',sans-serif}
-.box{background:var(--card);padding:36px 28px;border-radius:18px;border:1px solid var(--border);width:90%;max-width:380px}
-h1{color:var(--gold);text-align:center;letter-spacing:3px;margin:0 0 6px}
+body{
+  margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+  font-family:'Segoe UI',sans-serif;
+  /* GREEN FOREST BACKGROUND */
+  background: url('https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070') center/cover no-repeat fixed;
+  position:relative;
+}
+body::before{
+  content:"";position:absolute;inset:0;
+  background: rgba(0,0,0,0.55); /* dark overlay so login square still pops */
+  backdrop-filter: blur(2px);
+}
+.box{
+  position:relative; z-index:2;
+  background:var(--card);padding:36px 28px;border-radius:18px;
+  border:1px solid var(--border);width:90%;max-width:380px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.8)
+}
+h1{color:var(--gold);text-align:center;letter-spacing:3px;margin:0 0 6px;font-size:32px}
 .sub{color:#888;text-align:center;font-size:13px;margin-bottom:24px}
 input{width:100%;padding:14px;background:#0a0a0a;border:1px solid #333;border-radius:10px;color:white;box-sizing:border-box;margin:8px 0 12px}
-.btn{width:100%;padding:14px;background:var(--gold);color:black;border:none;border-radius:10px;font-weight:bold;cursor:pointer;margin-top:10px}
+input:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 1px var(--gold)}
+.btn{width:100%;padding:14px;background:var(--gold);color:black;border:none;border-radius:10px;font-weight:bold;font-size:15px;cursor:pointer;margin-top:10px}
+.btn:hover{background:#F5E6A3}
 .err{color:#ff6666;font-size:12px;text-align:center;margin-top:10px;display:none}
 </style>
-<!-- Firebase SDK - For future Auth -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
@@ -30,28 +47,23 @@ input{width:100%;padding:14px;background:#0a0a0a;border:1px solid #333;border-ra
 <script>
 // ==========================================================
 // 🔴🔴🔴 EDITABLE PASSWORDS - ONLY YOU CAN CHANGE HERE 🔴🔴🔴
-// Change the values inside " " to change passwords
-// This section is RED for you to find easily
 // ==========================================================
 const SECURE_CONFIG = {
-  manager: "manager@321", // <-- CHANGE MANAGER PASSWORD HERE
-  admin: "admin@321", // <-- CHANGE ADMIN PASSWORD HERE
-  maintenance: "maint@321", // <-- CHANGE MAINTENANCE PASSWORD HERE
-  resident_default: "resident@321" // <-- CHANGE ALL RESIDENT PASSWORD HERE
+  manager: "manager@321",
+  admin: "admin@321",
+  maintenance: "maint@321",
+  resident_default: "resident@321"
 };
 // ==========================================================
-// END OF EDITABLE SECTION - DO NOT EDIT BELOW
+// END OF EDITABLE SECTION
 // ==========================================================
-
-// Firebase Config - Replace with your project later
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "ozziekost.firebaseapp.com",
   projectId: "ozziekost",
   appId: "YOUR_APP_ID"
 };
-// Initialize Firebase (will work once you add your keys)
-try { firebase.initializeApp(firebaseConfig); } catch(e){ console.log("Firebase not yet configured, using local auth"); }
+try { firebase.initializeApp(firebaseConfig); } catch(e){}
 
 const ACCOUNTS = {
   "manager": {pass: SECURE_CONFIG.manager, role:"manager"},
@@ -63,20 +75,9 @@ const ACCOUNTS = {
   "A04": {pass: SECURE_CONFIG.resident_default, role:"resident", room:"A04"},
   "A05": {pass: SECURE_CONFIG.resident_default, role:"resident", room:"A05"}
 };
-
-async function login(){
+function login(){
   const u=document.getElementById('user').value.trim();
   const p=document.getElementById('pass').value.trim();
-
-  // 1. Try Firebase Auth first (if configured)
-  try {
-    if(firebase.apps.length && firebaseConfig.apiKey!== "YOUR_API_KEY"){
-      await firebase.auth().signInWithEmailAndPassword(u+"@ozziekost.com", p);
-      // If Firebase success, continue
-    }
-  } catch(e){ /* Firebase not configured, fallback to local */ }
-
-  // 2. Local secure check (fallback)
   const acc=ACCOUNTS[u];
   if(acc && acc.pass===p){
     localStorage.setItem("ozzie_session", JSON.stringify({user:u, role:acc.role, room:acc.room||""}));
@@ -85,6 +86,7 @@ async function login(){
     document.getElementById('err').style.display='block';
   }
 }
+document.addEventListener('keypress', e=>{ if(e.key==='Enter') login(); });
 </script>
 </body>
-</html>
+</html>  
