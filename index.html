@@ -92,7 +92,7 @@ window.login = async function(){
   if(auth){
     try{
       // allow login with email like manager@ozziekost.com
-      let email = u.includes("@")? u : `${u}@ozziekost-9a445.firebaseapp.com`;
+      let email = u.includes("@") ? u.trim().toLowerCase() : `${u.trim().toLowerCase()}@ozziekost-9a445.firebaseapp.com`;
       await signInWithEmailAndPassword(auth, email, p);
       localStorage.setItem("ozzie_session", JSON.stringify({user:u, role:"resident"}));
       location.href="dashboard.html";
