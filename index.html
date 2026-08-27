@@ -2,24 +2,26 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OZZIEKOST</title>
+<title>OZZIEKOST - Secure Login</title>
 <style>
 body{
   margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
   font-family:'Segoe UI',sans-serif;
-  background: #7ABD51; /* EXACT LEAF COLOUR FROM YOUR PHOTO */
+  background: #7ABD51;
 }
 .box{
   background:#141414;padding:36px 28px;border-radius:18px;
   border:1px solid #2a2a2a;width:90%;max-width:380px;
-  box-shadow:0 15px 50px rgba(0,0,0,0.4)
+  box-shadow:0 15px 50px rgba(0,0,0,0.5)
 }
 h1{color:#D4AF37;text-align:center;letter-spacing:3px;margin:0 0 6px;font-size:32px}
 .sub{color:#888;text-align:center;font-size:13px;margin-bottom:24px}
 input{width:100%;padding:14px;background:#0a0a0a;border:1px solid #333;border-radius:10px;color:white;box-sizing:border-box;margin:8px 0 12px}
 input:focus{border-color:#D4AF37;outline:none}
 .btn{width:100%;padding:14px;background:#D4AF37;color:black;border:none;border-radius:10px;font-weight:bold;font-size:15px;cursor:pointer;margin-top:10px}
+.btn:hover{background:#F5E6A3}
 .err{color:#ff6666;font-size:12px;text-align:center;margin-top:10px;display:none}
+.small{color:#666;font-size:11px;text-align:center;margin-top:14px}
 </style>
 </head>
 <body>
@@ -30,15 +32,37 @@ input:focus{border-color:#D4AF37;outline:none}
 <input id="pass" type="password" placeholder="Password">
 <button class="btn" onclick="login()">LOGIN</button>
 <div id="err" class="err">Invalid login</div>
+<div class="small">Base: #7ABD51 • Firebase Connected</div>
 </div>
-<script>
-// 🔴 EDITABLE PASSWORDS
+
+<script type="module">
+// 🔴🔴🔴 EDITABLE PASSWORDS - YOU CAN CHANGE HERE 🔴🔴🔴
 const SECURE_CONFIG = {
   manager: "manager@321",
   admin: "admin@321",
   maintenance: "maint@321",
   resident_default: "resident@321"
 };
+
+// ✅ YOUR REAL FIREBASE CONFIG - ALREADY FILLED
+const firebaseConfig = {
+  apiKey: "AIzaSyCz3H40ed8s9Xf5gcqYAuXPoTw_FpD4",
+  authDomain: "ozziekost-9a445.firebaseapp.com",
+  projectId: "ozziekost-9a445",
+  storageBucket: "ozziekost-9a445.firebasestorage.app",
+  messagingSenderId: "779016136276",
+  appId: "1:779016136276:web:7b2b16f1ff87a4df4d39b"
+};
+
+// Firebase init
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+let auth = null;
+try {
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+} catch(e){ console.log("Firebase init error", e); }
+
 const ACCOUNTS = {
   "manager": {pass: SECURE_CONFIG.manager, role:"manager"},
   "admin": {pass: SECURE_CONFIG.admin, role:"admin"},
@@ -49,15 +73,39 @@ const ACCOUNTS = {
   "A04": {pass: SECURE_CONFIG.resident_default, role:"resident", room:"A04"},
   "A05": {pass: SECURE_CONFIG.resident_default, role:"resident", room:"A05"}
 };
-function login(){
+
+window.login = async function(){
   const u=document.getElementById('user').value.trim();
   const p=document.getElementById('pass').value.trim();
   const acc=ACCOUNTS[u];
+  const errBox=document.getElementById('err');
+  errBox.style.display='none';
+
+  // 1. Try local system first (for A01, manager etc)
   if(acc && acc.pass===p){
-    localStorage.setItem("ozzie_session", JSON.stringify({user:u, role:acc.role}));
+    localStorage.setItem("ozzie_session", JSON.stringify({user:u, role:acc.role, room:acc.room||""}));
     location.href="dashboard.html";
-  } else { document.getElementById('err').style.display='block'; }
+    return;
+  }
+
+  // 2. Try Firebase if not local
+  if(auth){
+    try{
+      // allow login with email like manager@ozziekost.com
+      let email = u.includes("@")? u : `${u}@ozziekost-9a445.firebaseapp.com`;
+      await signInWithEmailAndPassword(auth, email, p);
+      localStorage.setItem("ozzie_session", JSON.stringify({user:u, role:"resident"}));
+      location.href="dashboard.html";
+      return;
+    }catch(e){
+      errBox.textContent = "Invalid login - " + e.message;
+      errBox.style.display='block';
+    }
+  } else {
+    errBox.style.display='block';
+  }
 }
+document.addEventListener('keypress', e=>{ if(e.key==='Enter') login(); });
 </script>
 </body>
 </html>
