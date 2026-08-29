@@ -87,7 +87,21 @@ function initTabs(){
   document.getElementById('tabs').innerHTML=list.map((t,i)=>`<div class="tab ${i==0?'active':''}" onclick="window.renderTab('${t}',this)">${t}</div>`).join("");
   window.renderTab(list[0], document.querySelector('.tab'));
 }
-
+window.migrateOldData = async () => {
+  const old = JSON.parse(localStorage.getItem("ozzie_db_v2")||"{}");
+  if(!old.profiles){ alert("Tidak ada data lama di browser ini"); return; }
+  if(!confirm(`Mau migrasi ${Object.keys(old.profiles).length} profiles ke Firebase?`)) return;
+  for(let room in old.profiles){
+    await setDoc(doc(dbfs,"profiles",room), old.profiles[room], {merge:true});
+  }
+  for(let p of (old.payments||[])){
+    await addDoc(collection(dbfs,"payments"), p);
+  }
+  for(let m of (old.maint||[])){
+    await addDoc(collection(dbfs,"maintenance"), m);
+  }
+  alert("Migrasi selesai!"); await loadAll(); window.renderTab("All Profiles",null);
+}
 window.renderTab = function(name, el){
   if(el){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); el.classList.add('active');}
   if(!name) name = (TABS[_role]||TABS['resident'])[0];
