@@ -1,39 +1,38 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OZZIEKOST - Secure Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OZZIEKOST - Secure Integrated System</title>
 <style>
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',sans-serif;background: var(--primary-green, #7ABD51);}
-.box{background:#141414;padding:36px 28px;border-radius:18px;border:1px solid #2a2a2a;width:90%;max-width:380px;box-shadow:0 15px 50px rgba(0,0,0,0.5)}
-h1{color:#D4AF37;text-align:center;letter-spacing:3px;margin:0 0 6px;font-size:32px}
-.sub{color:#888;text-align:center;font-size:13px;margin-bottom:24px}
-input{width:100%;padding:14px;background:#0a0a0a;border:1px solid #333;border-radius:10px;color:white;box-sizing:border-box;margin:8px 0 12px}
-input:focus{border-color:#D4AF37;outline:none}
-.btn{width:100%;padding:14px;background:#D4AF37;color:black;border:none;border-radius:10px;font-weight:bold;font-size:15px;cursor:pointer;margin-top:10px}
-.btn:hover{background:#F5E6A3}
-.err{color:#ff6666;font-size:12px;text-align:center;margin-top:10px;display:none}
-.small{color:#666;font-size:11px;text-align:center;margin-top:14px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
+body{background:#0a0a0a;display:flex;justify-content:center;align-items:center;min-height:100vh;border:6px solid #4ade80}
+.card{background:#111;width:360px;padding:32px;border-radius:16px;text-align:center}
+h1{color:#facc15;letter-spacing:3px;font-size:28px;font-weight:800}
+.sub{color:#666;font-size:12px;letter-spacing:3px;margin:8px 0 24px}
+input{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:14px 16px;border-radius:12px;margin-bottom:12px;outline:none}
+input:focus{border-color:#facc15}
+button{width:100%;background:#facc15;color:#000;font-weight:800;padding:14px;border:none;border-radius:12px;cursor:pointer;margin-top:8px;letter-spacing:1px}
+button:hover{background:#eab308}
+#err{color:#ff4d4d;font-size:12px;margin-top:14px;display:none;background:#2a1515;padding:8px;border-radius:8px}
+.foot{color:#444;font-size:10px;margin-top:16px}
 </style>
-<style id="dynamic-theme">:root{--primary-green:#7ABD51;}</style>
 </head>
 <body>
-<div class="box">
+<div class="card">
 <h1>OZZIEKOST</h1>
-<div class="sub"><p id="subtitle-text" style="opacity:0.8;letter-spacing:2px;">Secure Integrated System</p></div>
-<input id="user" placeholder="Username / Room No (contoh: A01 atau manager)">
-<input id="pass" type="password" placeholder="Password">
-<button class="btn" id="loginBtn">LOGIN</button>
-<div id="err" class="err"></div>
-<div class="small">Login pakai akun Firebase - Hubungi manager</div>
+<div class="sub">Secure Integrated System</div>
+<input id="user" placeholder="Username atau Email" value="manager@ozziekost.web.id" autocomplete="username">
+<input id="pass" type="password" placeholder="Password" value="" autocomplete="current-password">
+<button id="loginBtn">LOGIN</button>
+<div id="err"></div>
+<div class="foot">Login pakai akun Firebase - Hubungi manager</div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// CONFIG AMAN - sudah di-restrict ke ozziekost.web.id saja
 const firebaseConfig = {
   apiKey: "AIzaSyC3thAoOe8k0Xf5gcqrYauXbPoTw_PzWp4",
   authDomain: "ozziekost-9aa45.firebaseapp.com",
@@ -45,40 +44,67 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
 
-// Load branding dari Firestore
-try{
-  const snap = await getDoc(doc(db, "settings", "branding"));
-  if(snap.exists()){
-    const d = snap.data();
-    document.getElementById('subtitle-text').innerText = d.subtitle || "Secure Integrated System";
-    document.documentElement.style.setProperty('--primary-green', d.primaryColor || "#7ABD51");
-  }
-}catch(e){ console.log("branding skip", e); }
-
-// LOGIN BENERAN FIREBASE
 const login = async () => {
-  const u = document.getElementById('user').value.trim().toLowerCase();
+  const u = document.getElementById('user').value.trim();
   const p = document.getElementById('pass').value.trim();
   const errBox = document.getElementById('err');
+  const btn = document.getElementById('loginBtn');
   errBox.style.display='none';
-  if(!u || !p){ errBox.textContent="Isi username & password"; errBox.style.display='block'; return; }
-  
-  try{
-    let email = u.includes("@") ? u : `${u}@ozziekost.web.id`;
-    const cred = await signInWithEmailAndPassword(auth, email, p);
-    localStorage.setItem("ozzie_session", JSON.stringify({user: u, email: cred.user.email, uid: cred.user.uid}));
-    location.href="dashboard.html";
-  }catch(e){
-    errBox.textContent = "Login gagal: " + e.code;
+  errBox.textContent='';
+
+  if(!u ||!p){
+    errBox.textContent="Isi username & password dulu mbah";
     errBox.style.display='block';
-    console.error(e);
+    return;
   }
+
+  btn.textContent = "PROSES...";
+  btn.disabled = true;
+
+  // Daftar email yang akan dicoba
+  let emailsToTry = [];
+  if(u.includes("@")){
+    emailsToTry = [u];
+  } else {
+    emailsToTry = [
+      `${u}@ozziekost.web.id`,
+      `${u}@ozziekost-9aa45.firebaseapp.com`,
+      `${u}@ozziekost-9a445.firebaseapp.com`
+    ];
+  }
+
+  let lastError = null;
+  for(let email of emailsToTry){
+    try{
+      console.log("Mencoba login:", email);
+      const cred = await signInWithEmailAndPassword(auth, email, p);
+      localStorage.setItem("ozzie_session", JSON.stringify({user: u, email: email, uid: cred.user.uid, time: Date.now()}));
+      window.location.href = "dashboard.html";
+      return;
+    }catch(e){
+      lastError = e;
+      console.log("Gagal:", email, e.code);
+      // kalau salah password, jangan coba email lain
+      if(e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential'){
+         continue;
+      }
+    }
+  }
+
+  // Gagal semua
+  let msg = "Login gagal: " + (lastError? lastError.code : "unknown");
+  if(lastError && lastError.code === 'auth/invalid-credential'){
+    msg = "Password salah atau user belum ada di project ozziekost-9aa45. Bikin user manager@ozziekost.web.id di Firebase > Authentication > Add user";
+  }
+  errBox.textContent = msg;
+  errBox.style.display='block';
+  btn.textContent = "LOGIN";
+  btn.disabled = false;
 };
 
 document.getElementById('loginBtn').addEventListener('click', login);
-document.addEventListener('keypress', e=>{ if(e.key==='Enter') login(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Enter') login(); });
 </script>
 </body>
 </html>
