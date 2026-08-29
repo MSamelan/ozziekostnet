@@ -1,38 +1,50 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard - OZZIEKOST Secure</title>
 <style>
-:root{--gold:#D4AF37;--card:#141414;--border:#2a2a2a}
-body{margin:0;font-family:'Segoe UI',sans-serif;background:#0a0a0a;color:white}
-.header{background:#111;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-.header b{color:var(--gold)}.logout{background:#222;color:white;border:1px solid #444;padding:8px 16px;border-radius:6px;cursor:pointer}
-.tabs{display:flex;gap:8px;padding:15px 20px;background:#0f0f0f;overflow-x:auto;border-bottom:1px solid var(--border)}
-.tab{padding:10px 16px;background:#1e1e1e;border-radius:20px;cursor:pointer;white-space:nowrap;font-size:13px;border:1px solid #333}
-.tab.active{background:var(--gold);color:black;font-weight:bold}
-.content{padding:20px;max-width:1200px;margin:0 auto}
-.card{background:var(--card);padding:22px;border-radius:14px;border:1px solid var(--border);margin-bottom:18px}
-.card h3{color:var(--gold);margin:0 0 12px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){.grid2{grid-template-columns:1fr}}
-label{font-size:12px;color:#aaa;margin-top:8px;display:block}
-input,select,textarea{width:100%;padding:12px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:white;box-sizing:border-box;margin:6px 0 10px}
-.btn-gold{background:var(--gold);color:black;padding:9px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
-.btn-grey{background:#2a2a2a;color:#777;padding:8px 14px;border-radius:6px;border:1px solid #444;cursor:not-allowed}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left}th{color:var(--gold);font-size:11px}
-.badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:bold}.pending{background:#332a00;color:#ffcc00}.process{background:#332a00;color:#ffaa00;border:1px solid #ffaa00}.approved{background:#001a33;color:#4da6ff}.executed{background:#002e1a;color:#33ff99}.done{background:#1a3300;color:#88ff44}
-.thumb{width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #333}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
+body{background:#0a0a0a;color:#fff;min-height:100vh}
+.top{background:#111;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;position:sticky;top:0;z-index:10}
+.btn-gold{background:#facc15;color:#000;border:none;padding:8px 16px;border-radius:20px;font-weight:800;cursor:pointer;font-size:12px}
+.btn-gold:disabled{opacity:0.5}
+.tabs{display:flex;gap:8px;padding:12px 20px;overflow-x:auto;background:#0a0a0a;border-bottom:1px solid #1a1a1a}
+.tab{background:#1a1a1a;border:1px solid #333;color:#aaa;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:11px;white-space:nowrap}
+.tab.active{background:#facc15;color:#000;border-color:#facc15;font-weight:700}
+.card{background:#111;margin:20px;border-radius:12px;padding:20px;border:1px solid #222}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th{color:#facc15;text-align:left;padding:10px 6px;font-size:10px;border-bottom:1px solid #222;letter-spacing:1px}
+td{padding:10px 6px;font-size:12px;border-bottom:1px solid #1a1a1a}
+input,select,textarea{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:10px 12px;border-radius:8px;margin-bottom:10px;font-size:13px}
+input:focus{border-color:#facc15;outline:none}
+.badge{padding:3px 8px;border-radius:10px;font-size:10px;background:#333}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="header"><div>Welcome <b id="uLabel"></b> | Role: <b id="rLabel"></b> <span id="roomLabel"></span></div><button class="logout" id="logoutBtn">LOGOUT</button></div>
-<div class="tabs" id="tabs"></div>
-<div class="content" id="content">Loading secure data...</div>
+<div class="top">
+<div id="welcome" style="font-size:13px">Welcome <b style="color:#facc15">...</b> | Role: <b style="color:#facc15">...</b></div>
+<button class="btn-gold" onclick="window.logout()">LOGOUT</button>
+</div>
+
+<div class="tabs">
+<div class="tab active" id="tab-all" onclick="window.renderTab('All Profiles',this)">All Profiles</div>
+<div class="tab" onclick="window.renderTab('Finance & Payments',this)">Finance & Payments</div>
+<div class="tab" onclick="window.renderTab('Maintenance Worksheet',this)">Maintenance</div>
+<div class="tab" onclick="window.renderTab('Monthly Worksheet',this)">Monthly</div>
+<div class="tab" onclick="window.renderTab('Yearly Summary',this)">Yearly Summary</div>
+<div class="tab" onclick="window.renderTab('My Profile',this)">My Profile</div>
+</div>
+
+<div id="content" class="card">Loading secure data...</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3thAoOe8k0Xf5gcqrYauXbPoTw_PzWp4",
@@ -42,166 +54,118 @@ const firebaseConfig = {
   messagingSenderId: "77001631676",
   appId: "1:77001631676:web:7b2b1e51ffa87adf4dd3b9"
 };
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const dbfs = getFirestore(app);
 
-const sess = JSON.parse(localStorage.getItem("ozzie_session")||"null");
-if(!sess) location.href="index.html";
+let profiles={}, payments=[], maint=[];
+let s = JSON.parse(localStorage.getItem("ozzie_session")||"null");
 
-let profiles={}, payments=[], maint=[], _role='resident', _isManager=false;
-const fmt = (d)=>{if(!d)return"-"; try{const dt=new Date(d); if(isNaN(dt)) return d; return String(dt.getDate()).padStart(2,'0')+"/"+String(dt.getMonth()+1).padStart(2,'0')+"/"+dt.getFullYear();}catch{return d;}};
-const fmtMonthRange = (ms)=>{if(!ms||!ms.includes('-'))return"-"; const[y,m]=ms.split("-").map(Number); const s=new Date(y,m-1,1); const e=new Date(y,m,0); return fmt(s)+" to "+fmt(e);};
-const val = (id)=>document.getElementById(id)?.value||"";
+// LOAD FROM FIRESTORE
+async function loadAll(){
+  const snapP = await getDocs(collection(dbfs,"profiles"));
+  profiles={}; snapP.forEach(d=>profiles[d.id]=d.data());
+  const snapPay = await getDocs(collection(dbfs,"payments"));
+  payments=[]; snapPay.forEach(d=>payments.push({id:d.id,...d.data()}));
+  const snapM = await getDocs(collection(dbfs,"maintenance"));
+  maint=[]; snapM.forEach(d=>maint.push({id:d.id,...d.data()}));
+}
 
+// MIGRASI LOCALSTORAGE LAMA -> FIRESTORE
+window.migrateOldData = async ()=>{
+  const old = JSON.parse(localStorage.getItem("ozzie_db_v2")||"{}");
+  if(!old.profiles || Object.keys(old.profiles).length===0){
+    alert("Tidak ada data lama ozzie_db_v2 di browser ini.\nBuka dashboard di laptop/HP lama yang masih ada datanya, lalu klik tombol ini lagi.");
+    return;
+  }
+  if(!confirm(`Migrasi ${Object.keys(old.profiles).length} profiles + ${old.payments?.length||0} payments ke Firebase?`)) return;
+  for(let room in old.profiles){ await setDoc(doc(dbfs,"profiles",room), old.profiles[room], {merge:true}); }
+  for(let p of (old.payments||[])){ await addDoc(collection(dbfs,"payments"), p); }
+  for(let m of (old.maint||[])){ await addDoc(collection(dbfs,"maintenance"), m); }
+  alert("✅ Migrasi selesai!"); await loadAll(); window.renderTab("All Profiles",null);
+}
+
+// SAVE MY PROFILE
+window.saveMyProfile = async ()=>{
+  const room = (s.room||document.getElementById('inp-room').value.trim()||"a02").toLowerCase();
+  const data = {
+    name: document.getElementById('inp-name').value.trim(),
+    phone: document.getElementById('inp-phone').value.trim(),
+    moveIn: document.getElementById('inp-movein').value,
+    nextDue: document.getElementById('inp-nextdue').value,
+    status: "active",
+    updatedBy: s.email,
+    updatedAt: new Date().toISOString()
+  };
+  await setDoc(doc(dbfs,"profiles",room), data, {merge:true});
+  alert("✅ Profile disimpan ke Firebase!"); await loadAll(); window.renderTab("All Profiles",null);
+}
+
+// RENDER
+window.renderTab = function(name, el){
+  if(el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); }
+  const c = document.getElementById('content');
+  const isManager = s?.role==='manager';
+
+  if(name==="All Profiles"){
+    let h=`<h3 style="color:#facc15">All Profiles - ${Object.keys(profiles).length} rooms <button class="btn-gold" onclick="window.migrateOldData()" style="width:auto;padding:6px 12px;font-size:11px;margin-left:10px">MIGRASI DATA LAMA</button></h3>`;
+    h+=`<div style="overflow-x:auto"><table><tr><th>Room</th><th>Name</th><th>Phone</th><th>Move-in</th><th>Next Due</th><th>Status</th></tr>`;
+    const keys=Object.keys(profiles).sort();
+    if(keys.length===0) h+=`<tr><td colspan=6 style="color:#666;padding:20px">Belum ada data. Kalau dulu ada data di localStorage, klik MIGRASI DATA LAMA. Atau isi di tab My Profile.</td></tr>`;
+    else keys.forEach(r=>{ const p=profiles[r]; h+=`<tr><td><b>${r.toUpperCase()}</b></td><td>${p.name||'-'}</td><td>${p.phone||'-'}</td><td>${p.moveIn||'-'}</td><td>${p.nextDue||'-'}</td><td><span class="badge" style="background:${p.status==='active'?'#14532d':'#333'}">${p.status||'active'}</span></td></tr>`; });
+    h+=`</table></div>`; c.innerHTML=h;
+
+  } else if(name==="Finance & Payments"){
+    let h=`<h3 style="color:#facc15">Finance & Payments - ${payments.length} records</h3>`;
+    h+=`<div class="grid" style="margin-top:12px"><input id="pay-room" placeholder="Room (a02)"><input id="pay-amount" type="number" placeholder="Amount Rp"><input id="pay-date" type="date"><select id="pay-status"><option value="pending">Pending</option><option value="paid">Paid</option></select></div><button class="btn-gold" style="margin-top:10px" onclick="window.addPayment()">+ Add Payment</button>`;
+    h+=`<table><tr><th>Date</th><th>Room</th><th>Amount</th><th>Status</th>${isManager?'<th>Action</th>':''}</tr>${payments.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(p=>`<tr><td>${p.date||''}</td><td>${p.room||''}</td><td>Rp ${(p.amount||0).toLocaleString('id-ID')}</td><td>${p.status||''}</td>${isManager?`<td><button class="btn-gold" style="padding:4px 8px;font-size:10px" onclick="window.togglePay('${p.id}','${p.status}')">Toggle</button></td>`:''}</tr>`).join('')||'<tr><td colspan=5 style="color:#666">No records</td></tr>'}</table>`;
+    c.innerHTML=h;
+
+  } else if(name==="Maintenance Worksheet"){
+    let h=`<h3 style="color:#facc15">Maintenance Worksheet</h3><div class="grid" style="margin-top:12px"><input id="m-room" placeholder="Room"><input id="m-issue" placeholder="Issue"><input id="m-date" type="date"><select id="m-status"><option>open</option><option>in progress</option><option>done</option></select></div><button class="btn-gold" style="margin-top:10px" onclick="window.addMaint()">+ Add Issue</button>`;
+    h+=`<table><tr><th>Date</th><th>Room</th><th>Issue</th><th>Status</th></tr>${maint.map(m=>`<tr><td>${m.date||''}</td><td>${m.room||''}</td><td>${m.issue||''}</td><td>${m.status||''}</td></tr>`).join('')||'<tr><td colspan=4 style="color:#666">No records</td></tr>'}</table>`; c.innerHTML=h;
+
+  } else if(name==="My Profile"){
+    const myRoom = s.room||""; const myData = profiles[myRoom]||{};
+    c.innerHTML=`<h3 style="color:#facc15">My Profile - ${myRoom.toUpperCase()}</h3><p style="color:#666;font-size:11px;margin:6px 0 16px">Data akan disimpan ke Firebase Firestore, aman tidak bisa diedit user lain</p><div class="grid"><div><label style="font-size:11px;color:#aaa">Room</label><input id="inp-room" value="${myRoom}" placeholder="a02"></div><div><label style="font-size:11px;color:#aaa">Name</label><input id="inp-name" value="${myData.name||''}" placeholder="Nama Lengkap"></div><div><label style="font-size:11px;color:#aaa">Phone</label><input id="inp-phone" value="${myData.phone||''}" placeholder="08xx"></div><div><label style="font-size:11px;color:#aaa">Move-in</label><input id="inp-movein" type="date" value="${myData.moveIn||''}"></div><div><label style="font-size:11px;color:#aaa">Next Due</label><input id="inp-nextdue" type="date" value="${myData.nextDue||''}"></div></div><button class="btn-gold" style="margin-top:14px;width:100%;padding:14px" onclick="window.saveMyProfile()">SAVE TO FIREBASE</button>`;
+  } else {
+    c.innerHTML=`<h3 style="color:#facc15">${name}</h3><p style="color:#666;margin-top:10px">Fitur ${name} - data dari Firestore: ${Object.keys(profiles).length} profiles, ${payments.length} payments.</p>`;
+  }
+}
+
+window.addPayment = async ()=>{
+  const r=document.getElementById('pay-room').value.trim().toLowerCase(); const a=document.getElementById('pay-amount').value; const d=document.getElementById('pay-date').value; const st=document.getElementById('pay-status').value;
+  if(!r||!a) return alert("Isi room & amount");
+  await addDoc(collection(dbfs,"payments"),{room:r,amount:parseInt(a),date:d||new Date().toISOString().slice(0,10),status:st,createdBy:s.email}); await loadAll(); window.renderTab("Finance & Payments",null);
+}
+window.addMaint = async ()=>{
+  const r=document.getElementById('m-room').value.trim().toLowerCase(); const iss=document.getElementById('m-issue').value.trim(); const d=document.getElementById('m-date').value; const st=document.getElementById('m-status').value;
+  if(!r||!iss) return alert("Isi room & issue");
+  await addDoc(collection(dbfs,"maintenance"),{room:r,issue:iss,date:d||new Date().toISOString().slice(0,10),status:st,createdBy:s.email}); await loadAll(); window.renderTab("Maintenance Worksheet",null);
+}
+window.togglePay = async (id,cur)=>{
+  const ns = cur==='paid'?'pending':'paid';
+  await updateDoc(doc(dbfs,"payments",id),{status:ns}); await loadAll(); window.renderTab("Finance & Payments",null);
+}
+
+// AUTH STATE - INI BIAR TIDAK LOADING TERUS
 onAuthStateChanged(auth, async (user)=>{
-  if(!user){ localStorage.removeItem("ozzie_session"); location.href="index.html"; return; }
-  _isManager = user.email === 'manager@ozziekost.web.id';
-  _role = _isManager? 'manager' : (sess.role||'resident');
-  // jika user bukan manager tapi role di sess manager, paksa resident
-  if(!_isManager && sess.email!== 'manager@ozziekost.web.id'){ _role='resident'; }
-
-  document.getElementById('uLabel').innerText = sess.user;
-  document.getElementById('rLabel').innerText = _role.toUpperCase();
-  document.getElementById('roomLabel').innerText = sess.room?"| Room "+sess.room:"";
-  await loadAll();
-  initTabs();
+  if(!user){ location.href='index.html'; return; }
+  if(!s || s.uid!==user.uid){
+    s={user:user.email.split('@')[0],email:user.email,uid:user.uid,role:user.email==='manager@ozziekost.web.id'?'manager':'resident',room:user.email.split('@')[0]};
+    localStorage.setItem('ozzie_session', JSON.stringify(s));
+  }
+  document.getElementById('welcome').innerHTML=`Welcome <b style="color:#facc15">${s.user}</b> | Role: <b style="color:#facc15">${s.role.toUpperCase()}</b> <span style="color:#666;font-size:10px">(${s.email})</span>`;
+  try{
+    await loadAll();
+    window.renderTab("All Profiles", document.getElementById('tab-all'));
+  }catch(err){
+    document.getElementById('content').innerHTML=`<div style="color:#ff4d4d"><h3>Gagal load Firestore</h3><p style="margin-top:8px;font-size:12px">Error: ${err.message}</p><p style="margin-top:12px;font-size:12px;color:#aaa">Fix: Firebase Console > Firestore Database > Rules > Publish ini:</p><pre style="background:#1a1a1a;padding:10px;margin-top:8px;border-radius:8px;color:#facc15;font-size:11px;overflow:auto">rules_version = '2';\nservice cloud.firestore {\n match /databases/{database}/documents {\n match /{document=**} {\n allow read, write: if request.auth!= null;\n }\n }\n}</pre><p style="margin-top:12px;font-size:11px;color:#aaa">Setelah Publish, refresh halaman ini.</p></div>`;
+  }
 });
 
-async function loadAll(){
-  const c = document.getElementById('content'); c.innerHTML="Loading secure data from Firebase...";
-  let ps = await getDocs(collection(dbfs,"profiles")); profiles={}; ps.forEach(d=>profiles[d.id]=d.data());
-  let py = await getDocs(collection(dbfs,"payments")); payments=[]; py.forEach(d=>payments.push({firestoreId:d.id,...d.data()}));
-  let mn = await getDocs(collection(dbfs,"maintenance")); maint=[]; mn.forEach(d=>maint.push({firestoreId:d.id,...d.data()}));
-}
-
-const TABS={
-  resident:["My Profile","Upload Receipt","Request Maintenance","My History"],
-  admin:["All Profiles","Payment Process","Maintenance Process","Monthly Worksheet"],
-  maintenance:["Maintenance Worksheet"],
-  manager:["All Profiles","Finance & Payments","Maintenance Worksheet","Monthly Worksheet","Yearly Summary"]
-};
-
-function initTabs(){
-  const list = TABS[_role] || TABS['resident'];
-  document.getElementById('tabs').innerHTML=list.map((t,i)=>`<div class="tab ${i==0?'active':''}" onclick="window.renderTab('${t}',this)">${t}</div>`).join("");
-  window.renderTab(list[0], document.querySelector('.tab'));
-}
-window.migrateOldData = async () => {
-  const old = JSON.parse(localStorage.getItem("ozzie_db_v2")||"{}");
-  if(!old.profiles){ alert("Tidak ada data lama di browser ini"); return; }
-  if(!confirm(`Mau migrasi ${Object.keys(old.profiles).length} profiles ke Firebase?`)) return;
-  for(let room in old.profiles){
-    await setDoc(doc(dbfs,"profiles",room), old.profiles[room], {merge:true});
-  }
-  for(let p of (old.payments||[])){
-    await addDoc(collection(dbfs,"payments"), p);
-  }
-  for(let m of (old.maint||[])){
-    await addDoc(collection(dbfs,"maintenance"), m);
-  }
-  alert("Migrasi selesai!"); await loadAll(); window.renderTab("All Profiles",null);
-}
-window.renderTab = function(name, el){
-  if(el){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); el.classList.add('active');}
-  if(!name) name = (TABS[_role]||TABS['resident'])[0];
-  const c=document.getElementById('content');
-
-  if(name=="My Profile"){
-    const roomKey=sess.room||sess.user; const p=profiles[roomKey]||{};
-    c.innerHTML=`<div class="card"><h3>My Profile - ${roomKey}</h3><div style="background:#1a1500;border:1px solid #D4AF37;padding:10px;border-radius:8px;margin-bottom:10px;color:#D4AF37">Next Due Date: <b>${fmt(p.due)}</b> (auto after Manager Approve)</div><div class="grid2"><div><label>Full Name</label><input id="f_name" value="${p.fullName||''}"></div><div><label>NIK</label><input id="f_nik" value="${p.nik||''}"></div><div><label>Address</label><input id="f_addr" value="${p.addr||''}"></div><div><label>Phone</label><input id="f_phone" value="${p.phone||''}"></div><div><label>Emergency Contact</label><input id="f_emer" value="${p.emer||''}"></div><div><label>Move-in Date</label><input type="date" id="f_in" value="${p.moveIn||''}"><small>${fmt(p.moveIn)}</small></div><div><label>Next Due Date</label><input type="date" id="f_due" value="${p.due||''}" ${_isManager?'':'readonly style="background:#222"'}><small>${fmt(p.due)} ${_isManager?'(Manager can edit)':''}</small></div></div><button class="btn-gold" style="margin-top:10px" id="btnSaveProfile">Save Profile</button></div>`;
-    document.getElementById('btnSaveProfile').onclick = async ()=>{
-      const data={fullName:val('f_name'), nik:val('f_nik'), addr:val('f_addr'), phone:val('f_phone'), emer:val('f_emer'), moveIn:val('f_in'), due:val('f_due')||p.due||""};
-      await setDoc(doc(dbfs,"profiles",roomKey), data, {merge:true});
-      profiles[roomKey]=data; alert("Saved secure! Due: "+fmt(data.due));
-    };
-  }
-  else if(name=="Upload Receipt"){
-    c.innerHTML=`<div class="card"><h3>Upload Receipt</h3><div class="grid2"><div><label>Month For</label><input type="month" id="p_month"></div><div><label>Amount</label><input type="number" id="p_amount"></div><div><label>Payment Date</label><input type="date" id="p_date" value="${new Date().toISOString().split('T')[0]}"></div><div><label>Photo Receipt</label><input type="file" id="p_file" accept="image/*"><img id="prev" style="display:none;margin-top:8px" class="thumb"></div></div><button class="btn-gold" id="btnPay">Submit</button></div>`;
-    document.getElementById('p_file').onchange=(e)=>preview(e.target,'prev');
-    document.getElementById('btnPay').onclick= async ()=>{
-      if(!val('p_amount')||!val('p_month')) return alert("Fill amount & month");
-      const img=document.getElementById('prev')?.src||"";
-      await addDoc(collection(dbfs,"payments"), {room:sess.room||sess.user, month:val('p_month'), amount:val('p_amount'), date:val('p_date'), img, status:'pending', created:Date.now()});
-      alert("Submitted to Admin"); await loadAll(); window.renderTab(name,null);
-    };
-  }
-  else if(name=="Request Maintenance"){
-    c.innerHTML=`<div class="card"><h3>Request Maintenance</h3><div class="grid2"><div><label>Req. Date</label><input type="date" id="m_date" value="${new Date().toISOString().split('T')[0]}"></div><div><label>Type</label><select id="m_type"><option>AC</option><option>Water</option><option>Electric</option><option>General</option></select></div></div><label>Description</label><textarea id="m_desc" rows="3"></textarea><label>Photo</label><input type="file" id="m_file" accept="image/*"><img id="mprev" style="display:none" class="thumb"><br><button class="btn-gold" style="margin-top:10px" id="btnMaint">Submit</button></div>`;
-    document.getElementById('m_file').onchange=(e)=>preview(e.target,'mprev');
-    document.getElementById('btnMaint').onclick= async ()=>{
-      if(!val('m_desc')) return alert("Fill desc");
-      const img=document.getElementById('mprev')?.src||"";
-      await addDoc(collection(dbfs,"maintenance"), {room:sess.room||sess.user, date:val('m_date'), type:val('m_type'), desc:val('m_desc'), img, status:'pending', created:Date.now()});
-      alert("Submitted"); await loadAll(); window.renderTab(name,null);
-    };
-  }
-  else if(name=="My History"){
-    const pays=payments.filter(x=>x.room==(sess.room||sess.user));
-    c.innerHTML=`<div class="card"><h3>My History - Secure from Firebase</h3><table><tr><th>Pay Period</th><th>Payment Date</th><th>Amount</th><th>Status</th><th>Due Date</th></tr>${pays.map(x=>`<tr><td>${fmtMonthRange(x.month)}</td><td>${fmt(x.date)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${fmt(profiles[x.room]?.due)}</td></tr>`).join("")||'<tr><td colspan=5>No data</td></tr>'}</table></div>`;
-  }
-  else if(name=="All Profiles"){
-    const rows=Object.keys(profiles).map(r=>{const p=profiles[r]; return `<tr><td>${r}</td><td>${p.fullName||'-'}</td><td>${p.phone||'-'}</td><td>${fmt(p.moveIn)}</td><td style="color:#D4AF37;font-weight:bold">${fmt(p.due)}</td><td>${_isManager?`<button class="btn-gold" onclick="window.editDue('${r}')">Edit Due</button>`:''}</td></tr>`}).join("");
-    c.innerHTML=`<div class="card"><h3>All Profiles - ${Object.keys(profiles).length} rooms ${!_isManager?'(Read only)':''}</h3><table><tr><th>Room</th><th>Name</th><th>Phone</th><th>Move-in</th><th>Next Due</th><th>Action</th></tr>${rows||'<tr><td colspan=6>No profiles</td></tr>'}</table></div>`;
-  }
-  else if(name=="Payment Process"){
-    c.innerHTML=`<div class="card"><h3>Payment Process (Admin/Manager)</h3><table><tr><th>Room</th><th>Pay Date</th><th>Period</th><th>Amount</th><th>Receipt</th><th>Status</th><th>Action</th></tr>${payments.map(x=>`<tr><td>${x.room}</td><td>${fmt(x.date)}</td><td>${fmtMonthRange(x.month)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='pending'?`<button class="btn-gold" onclick="window.adminProcess('payment','${x.firestoreId}')">Process</button>`:`<button class="btn-grey" disabled>Processed</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`;
-  }
-  else if(name=="Finance & Payments"){
-    if(!_isManager){ c.innerHTML=`<div class="card"><h3>Access Denied - Manager Only</h3><p>Hanya manager@ozziekost.web.id yang bisa Approve finance.</p></div>`; return; }
-    const total=payments.filter(p=>p.status=='executed').reduce((s,x)=>s+Number(x.amount||0),0);
-    c.innerHTML=`<div class="card"><h3>Finance & Payments - Total Executed Rp ${total.toLocaleString()} (MANAGER TAB - Can Edit)</h3><table><tr><th>Room</th><th>Pay Date</th><th>Period</th><th>Amount</th><th>Receipt</th><th>Status</th><th>Action</th></tr>${payments.map(x=>`<tr><td>${x.room}</td><td>${fmt(x.date)}</td><td>${fmtMonthRange(x.month)}</td><td>Rp ${Number(x.amount).toLocaleString()}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='process'?`<button class="btn-gold" onclick="window.managerApprove('payment','${x.firestoreId}')">Approve & Update Due</button>`:`<button class="btn-grey" disabled>${x.status}</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`;
-  }
-  else if(name=="Maintenance Process"){
-    c.innerHTML=`<div class="card"><h3>Maintenance Process (Admin)</h3><table><tr><th>Req Date</th><th>Room</th><th>Type</th><th>Description</th><th>Photo</th><th>Status</th><th>Action</th></tr>${maint.map(x=>`<tr><td>${fmt(x.date)}</td><td>${x.room}</td><td>${x.type}</td><td>${x.desc}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='pending'?`<button class="btn-gold" onclick="window.adminProcess('maint','${x.firestoreId}')">Process</button>`:`<button class="btn-grey" disabled>Processed</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`;
-  }
-  else if(name=="Maintenance Worksheet"){
-   c.innerHTML=`<div class="card"><h3>All Profiles - ${Object.keys(profiles).length} rooms <button class="btn-gold" onclick="window.migrateOldData()" style="width:auto;padding:6px 12px;font-size:11px;margin-left:10px">MIGRASI DATA LAMA</button></h3>...
-  else if(name=="Monthly Worksheet"||name=="Yearly Summary"){
-    const isYear=name.includes("Yearly");
-    let html=`<div class="card"><h3>${name} ${!_isManager?'(Read Only)':'(Manager Can Edit)'}</h3><p>Total Payments: ${payments.length} | Executed: ${payments.filter(p=>p.status=='executed').length} | Maintenance: ${maint.length}</p><table><tr><th>Month</th><th>Income</th><th>Rooms Paid</th></tr>`;
-    let months={}; payments.filter(p=>p.status=='executed').forEach(p=>{months[p.month]=(months[p.month]||0)+Number(p.amount||0);});
-    Object.keys(months).forEach(m=>{html+=`<tr><td>${fmtMonthRange(m)}</td><td>Rp ${months[m].toLocaleString()}</td><td>${payments.filter(p=>p.month==m&&p.status=='executed').length}</td></tr>`});
-    html+=`</table></div>`;
-    c.innerHTML=html;
-  }
-}
-
-window.actionMaint = (x)=>{
-  if(_isManager && x.status=='process') return `<button class="btn-gold" onclick="window.managerApprove('maint','${x.firestoreId}')">Approve</button>`;
-  if(_role=='maintenance' && (x.status=='approved' || x.status=='process')) return `<button class="btn-gold" onclick="window.doneMaint('${x.firestoreId}')">Mark Done</button>`;
-  if(x.status=='done' || x.status=='executed') return `<button class="btn-grey" disabled>Done</button>`;
-  if(x.status=='process') return `<span style="color:#ffaa00">Waiting Manager</span>`;
-  return `<span style="color:#666">${x.status}</span>`;
-}
-window.adminProcess = async (type,id)=>{
-  if(type=='payment') await updateDoc(doc(dbfs,"payments",id), {status:'process'});
-  else await updateDoc(doc(dbfs,"maintenance",id), {status:'process'});
-  await loadAll(); window.renderTab(document.querySelector('.tab.active').innerText,null);
-}
-window.managerApprove = async (type,id)=>{
-  if(!_isManager) return alert("Hanya Manager!");
-  if(type=='payment'){
-    const pay=payments.find(p=>p.firestoreId===id);
-    await updateDoc(doc(dbfs,"payments",id), {status:'executed'});
-    if(pay && pay.month){ const [y,m]=pay.month.split("-").map(Number); const next=new Date(y,m,1); await setDoc(doc(dbfs,"profiles",pay.room), {due:next.toISOString().split('T')[0]}, {merge:true}); alert("Approved! Due "+pay.room+" -> "+fmt(next.toISOString())); }
-  } else {
-    await updateDoc(doc(dbfs,"maintenance",id), {status:'approved'});
-  }
-  await loadAll(); window.renderTab(document.querySelector('.tab.active').innerText,null);
-}
-window.doneMaint = async (id)=>{ await updateDoc(doc(dbfs,"maintenance",id), {status:'done'}); await loadAll(); window.renderTab(document.querySelector('.tab.active').innerText,null); }
-window.editDue = async (room)=>{
-  if(!_isManager) return alert("Manager only");
-  const newDue=prompt("Masukkan Next Due baru (YYYY-MM-DD) untuk "+room, profiles[room]?.due||"");
-  if(newDue){ await setDoc(doc(dbfs,"profiles",room), {due:newDue}, {merge:true}); await loadAll(); window.renderTab("All Profiles",null); }
-}
-window.preview = (inp,id)=>{ const r=new FileReader(); r.onload=e=>{const im=document.getElementById(id); if(im){im.src=e.target.result; im.style.display='block';}}; if(inp.files[0]) r.readAsDataURL(inp.files[0]); }
-
-document.getElementById('logoutBtn').onclick = async ()=>{ await signOut(auth); localStorage.removeItem("ozzie_session"); location.href="index.html"; };
-
-// Anti klik kanan basic
-document.addEventListener('contextmenu', e=>e.preventDefault());
+window.logout = async ()=>{ await signOut(auth); localStorage.removeItem('ozzie_session'); location.href='index.html'; }
 </script>
 </body>
 </html>
