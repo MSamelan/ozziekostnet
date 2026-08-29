@@ -1,39 +1,27 @@
 <!DOCTYPE html>
 <html lang="id">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>OZZIEKOST</title>
-<style>*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}body{background:#0a0a0a;display:flex;justify-content:center;align-items:center;min-height:100vh;border:6px solid #4ade80}.card{background:#111;width:360px;padding:32px;border-radius:16px;text-align:center}h1{color:#facc15;letter-spacing:3px;font-size:28px}input{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:14px;border-radius:12px;margin-bottom:12px}button{width:100%;background:#facc15;color:#000;font-weight:800;padding:14px;border:none;border-radius:12px;cursor:pointer}#err{color:#ff4d4d;font-size:11px;margin-top:14px;display:none;background:#2a1515;padding:8px;border-radius:8px;word-break:break-all}</style>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>OZZIEKOST</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}body{background:#0a0a0a;display:flex;justify-content:center;align-items:center;min-height:100vh} .card{background:#111;width:360px;padding:32px;border-radius:16px;text-align:center}h1{color:#facc15} input{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:14px;border-radius:12px;margin-bottom:12px} button{width:100%;background:#facc15;color:#000;font-weight:800;padding:14px;border:none;border-radius:12px;cursor:pointer} #err{color:#ff4d4d;font-size:11px;margin-top:12px;display:none;background:#2a1515;padding:10px;border-radius:8px;word-break:break-all}</style>
 </head>
 <body>
-<div class="card"><h1>OZZIEKOST</h1><p style="color:#666;font-size:11px;margin:8px 0 20px">Secure Integrated System</p><input id="u" value="manager@ozziekost.web.id"><input id="p" type="password" placeholder="Password - ketik manual"><button id="b">LOGIN</button><div id="err"></div></div>
+<div class="card"><h1>OZZIEKOST</h1><br><input id="u" value="manager@ozziekost.web.id"><input id="p" type="password" placeholder="Password - isi manager123"><button id="b">LOGIN</button><div id="err"></div></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-const firebaseConfig = {
-  apiKey: "AIzaSyC3thAoOe8k0Xf5gcqrYauXbPoTw_PzWp4",
-  authDomain: "ozziekost-9aa45.firebaseapp.com",
-  projectId: "ozziekost-9aa45",
-  storageBucket: "ozziekost-9aa45.firebasestorage.app",
-  messagingSenderId: "77001631676",
-  appId: "1:77001631676:web:7b2b1e51ffa87adf4dd3b9"
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const $=id=>document.getElementById(id);
-$('b').onclick=async()=>{
-  const email=$('u').value.trim();
-  const pass=$('p').value;
-  const err=$('err');
+const firebaseConfig = { apiKey: "AIzaSyC3thAoOe8k0Xf5gcqrYauXbPoTw_PzWp4", authDomain: "ozziekost-9aa45.firebaseapp.com", projectId: "ozziekost-9aa45", storageBucket: "ozziekost-9aa45.firebasestorage.app", messagingSenderId: "77001631676", appId: "1:77001631676:web:7b2b1e51ffa87adf4dd3b9" };
+const app = initializeApp(firebaseConfig); const auth = getAuth(app);
+document.getElementById('b').onclick = async ()=>{
+  const e=document.getElementById('u').value.trim(); const p=document.getElementById('p').value.trim(); const err=document.getElementById('err');
   err.style.display='none';
-  $('b').textContent='PROSES...';
   try{
-    const cred=await signInWithEmailAndPassword(auth,email,pass);
-    localStorage.setItem('ozzie_session',JSON.stringify({user:email.split('@')[0],email:cred.user.email,uid:cred.user.uid,role:'manager',room:''}));
+    const c = await signInWithEmailAndPassword(auth, e, p);
+    localStorage.setItem('ozzie_session', JSON.stringify({user:'manager', email:c.user.email, uid:c.user.uid, role:'manager', room:''}));
     location.href='dashboard.html';
-  }catch(e){
+  }catch(x){
     err.style.display='block';
-    err.textContent=e.code+" : "+e.message;
-    $('b').textContent='LOGIN';
-    console.log(e);
+    err.textContent = 'CODE: '+x.code+' | MSG: '+x.message;
+    console.log(x);
   }
 };
 </script>
