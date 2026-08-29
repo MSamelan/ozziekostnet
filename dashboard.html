@@ -156,8 +156,7 @@ window.renderTab = function(name, el){
     c.innerHTML=`<div class="card"><h3>Maintenance Process (Admin)</h3><table><tr><th>Req Date</th><th>Room</th><th>Type</th><th>Description</th><th>Photo</th><th>Status</th><th>Action</th></tr>${maint.map(x=>`<tr><td>${fmt(x.date)}</td><td>${x.room}</td><td>${x.type}</td><td>${x.desc}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${x.status=='pending'?`<button class="btn-gold" onclick="window.adminProcess('maint','${x.firestoreId}')">Process</button>`:`<button class="btn-grey" disabled>Processed</button>`}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`;
   }
   else if(name=="Maintenance Worksheet"){
-    c.innerHTML=`<div class="card"><h3>Maintenance Worksheet - ${_role}</h3><table><tr><th>Req Date</th><th>Room</th><th>Type</th><th>Description</th><th>Photo</th><th>Status</th><th>Action</th></tr>${maint.map(x=>`<tr><td>${fmt(x.date)}</td><td>${x.room}</td><td>${x.type}</td><td>${x.desc}</td><td>${x.img?`<img src="${x.img}" class="thumb">`:'-'}</td><td><span class="badge ${x.status}">${x.status}</span></td><td>${window.actionMaint(x)}</td></tr>`).join("")||'<tr><td colspan=7>No data</td></tr>'}</table></div>`;
-  }
+   c.innerHTML=`<div class="card"><h3>All Profiles - ${Object.keys(profiles).length} rooms <button class="btn-gold" onclick="window.migrateOldData()" style="width:auto;padding:6px 12px;font-size:11px;margin-left:10px">MIGRASI DATA LAMA</button></h3>...
   else if(name=="Monthly Worksheet"||name=="Yearly Summary"){
     const isYear=name.includes("Yearly");
     let html=`<div class="card"><h3>${name} ${!_isManager?'(Read Only)':'(Manager Can Edit)'}</h3><p>Total Payments: ${payments.length} | Executed: ${payments.filter(p=>p.status=='executed').length} | Maintenance: ${maint.length}</p><table><tr><th>Month</th><th>Income</th><th>Rooms Paid</th></tr>`;
