@@ -2,16 +2,34 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OZZIEKOST - Secure Integrated System</title>
-<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}body{background:#0a0a0a;display:flex;justify-content:center;align-items:center;min-height:100vh;border:6px solid #4ade80}.card{background:#111;width:360px;padding:32px;border-radius:16px;text-align:center}h1{color:#facc15;letter-spacing:3px;font-size:28px;font-weight:800}.sub{color:#666;font-size:11px;letter-spacing:3px;margin:8px 0 24px}input{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:14px 16px;border-radius:12px;margin-bottom:12px;outline:none}button{width:100%;background:#facc15;color:#000;font-weight:800;padding:14px;border:none;border-radius:12px;cursor:pointer} #err{color:#ff4d4d;font-size:11px;margin-top:14px;display:none;background:#2a1515;padding:8px;border-radius:8px}</style>
+<title>OZZIEKOST - Secure</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
+body{background:#0a0a0a;display:flex;justify-content:center;align-items:center;min-height:100vh;border:6px solid #4ade80}
+.card{background:#111;width:360px;padding:32px;border-radius:16px;text-align:center}
+h1{color:#facc15;letter-spacing:3px;font-size:28px;font-weight:800}
+.sub{color:#666;font-size:11px;letter-spacing:3px;margin:8px 0 24px}
+input{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:14px 16px;border-radius:12px;margin-bottom:12px;outline:none}
+input:focus{border-color:#facc15}
+button{width:100%;background:#facc15;color:#000;font-weight:800;padding:14px;border:none;border-radius:12px;cursor:pointer}
+#err{color:#ff4d4d;font-size:11px;margin-top:14px;display:none;background:#2a1515;padding:8px;border-radius:8px}
+.foot{color:#444;font-size:10px;margin-top:16px}
+</style>
 </head>
 <body>
-<div class="card"><h1>OZZIEKOST</h1><div class="sub">Secure Integrated System</div><input id="u" placeholder="Username" autocomplete="off"><input id="p" type="password" placeholder="Password"><button id="b">LOGIN</button><div id="err"></div></div>
+<div class="card">
+<h1>OZZIEKOST</h1>
+<div class="sub">Secure Integrated System</div>
+<input id="u" placeholder="Username atau Email" autocomplete="off">
+<input id="p" type="password" placeholder="Password">
+<button id="b">LOGIN</button>
+<div id="err"></div>
+<div class="foot">© OZZIEKOST Secure - Manager Only Edit</div>
+</div>
 
 <script type="module">
-// Config di-load dari file terpisah biar tidak nongol di view-source utama
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3thAoOe8k0Xf5gcqrYauXbPoTw_PzWp4",
@@ -24,29 +42,46 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const _0x = (id)=>document.getElementById(id);
+await setPersistence(auth, browserLocalPersistence);
 
-_0x('b').onclick = async ()=>{
-  const user = _0x('u').value.trim();
-  const pass = _0x('p').value.trim();
-  const err = _0x('err');
-  if(!user||!pass){err.style.display='block';err.textContent='Isi dulu';return;}
-  err.style.display='none'; _0x('b').textContent='...';
-  const tryEmails = user.includes('@')?[user]:[`${user}@ozziekost.web.id`, `${user}@ozziekost-9aa45.firebaseapp.com`];
-  for(let e of tryEmails){
+const $ = (id)=>document.getElementById(id);
+
+$('b').onclick = async ()=>{
+  const user = $('u').value.trim();
+  const pass = $('p').value.trim();
+  const err = $('err');
+  if(!user||!pass){err.style.display='block'; err.textContent='Isi username & password'; return;}
+  err.style.display='none'; $('b').textContent='PROSES...'; $('b').disabled=true;
+
+  const tryEmails = user.includes('@')? [user] : [`${user}@ozziekost.web.id`, `${user}@ozziekost-9aa45.firebaseapp.com`, `manager@ozziekost.web.id`];
+
+  for(let email of tryEmails){
     try{
-      let c = await signInWithEmailAndPassword(auth,e,pass);
-      localStorage.setItem('ozzie_session', JSON.stringify({uid:c.user.uid, email:e, role:'manager'}));
-      location.href='dashboard.html'; return;
-    }catch(x){}
+      const cred = await signInWithEmailAndPassword(auth, email, pass);
+      const isManager = cred.user.email === 'manager@ozziekost.web.id';
+      // Simpan session untuk dashboard
+      localStorage.setItem('ozzie_session', JSON.stringify({
+        user: user.split('@')[0],
+        email: cred.user.email,
+        uid: cred.user.uid,
+        role: isManager? 'manager' : 'resident',
+        room: isManager? '' : user.split('@')[0]
+      }));
+      location.href='dashboard.html';
+      return;
+    }catch(e){
+      console.log('fail',email,e.code);
+    }
   }
-  err.style.display='block'; err.textContent='Login gagal. Cek user di Firebase Authentication';
-  _0x('b').textContent='LOGIN';
+  err.style.display='block';
+  err.textContent='Login gagal. Pastikan user ada di Firebase > Authentication > Users (ozziekost-9aa45)';
+  $('b').textContent='LOGIN'; $('b').disabled=false;
 };
 
-// Anti klik kanan & F12 buat orang awam
+// Enter untuk login
+document.addEventListener('keydown', e=>{ if(e.key==='Enter') $('b').click(); });
+// Anti klik kanan
 document.addEventListener('contextmenu', e=>e.preventDefault());
-document.addEventListener('keydown', e=>{ if(e.key==='F12' || (e.ctrlKey&&e.shiftKey&&e.key==='I')) e.preventDefault(); });
 </script>
 </body>
 </html>
