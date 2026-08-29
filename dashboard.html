@@ -7,19 +7,22 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
 body{background:#0a0a0a;color:#fff;min-height:100vh}
-.top{background:#111;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;position:sticky;top:0;z-index:10}
-.btn-gold{background:#facc15;color:#000;border:none;padding:8px 16px;border-radius:20px;font-weight:800;cursor:pointer;font-size:12px}
-.tabs{display:flex;gap:8px;padding:12px 20px;overflow-x:auto;background:#0a0a0a;border-bottom:1px solid #1a1a1a}
+.top{background:#111;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;position:sticky;top:0;z-index:20}
+.btn-gold{background:#facc15;color:#000;border:none;padding:9px 18px;border-radius:20px;font-weight:800;cursor:pointer;font-size:12px}
+.btn-gold:disabled{opacity:.5}
+.btn-dark{background:#222;color:#aaa;border:1px solid #333;padding:8px 14px;border-radius:20px;font-size:11px;cursor:pointer}
+.tabs{display:flex;gap:8px;padding:12px 20px;overflow-x:auto;background:#0a0a0a;border-bottom:1px solid #1a1a1a;position:sticky;top:56px;z-index:10}
 .tab{background:#1a1a1a;border:1px solid #333;color:#aaa;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:11px;white-space:nowrap}
-.tab.active{background:#facc15;color:#000;border-color:#facc15;font-weight:700}
-.card{background:#111;margin:20px;border-radius:12px;padding:20px;border:1px solid #222}
+.tab.active{background:#facc15;color:#000;border-color:#facc15;font-weight:800}
+.card{background:#111;margin:20px;border-radius:14px;padding:20px;border:1px solid #222}
 table{width:100%;border-collapse:collapse;margin-top:12px}
 th{color:#facc15;text-align:left;padding:10px 6px;font-size:10px;border-bottom:1px solid #222;letter-spacing:1px}
 td{padding:10px 6px;font-size:12px;border-bottom:1px solid #1a1a1a}
-input,select{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:10px 12px;border-radius:8px;margin-bottom:10px;font-size:13px}
+input,select{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:11px 12px;border-radius:10px;margin-bottom:10px;font-size:13px}
 input:focus{border-color:#facc15;outline:none}
-.badge{padding:3px 8px;border-radius:10px;font-size:10px;background:#333}
+.badge{padding:4px 9px;border-radius:10px;font-size:10px;background:#222}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.alert{background:#1a1a1a;border:1px solid #facc15;color:#facc15;padding:10px 12px;border-radius:10px;font-size:11px;margin-bottom:12px}
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -28,19 +31,20 @@ input:focus{border-color:#facc15;outline:none}
 <div id="welcome" style="font-size:13px">Welcome <b style="color:#facc15">...</b> | Role: <b style="color:#facc15">...</b></div>
 <button class="btn-gold" onclick="window.logout()">LOGOUT</button>
 </div>
+
 <div class="tabs">
 <div class="tab active" id="tab-all" onclick="window.renderTab('All Profiles',this)">All Profiles</div>
-<div class="tab" onclick="window.renderTab('Finance & Payments',this)">Finance & Payments</div>
+<div class="tab" onclick="window.renderTab('Finance',this)">Finance</div>
 <div class="tab" onclick="window.renderTab('Maintenance',this)">Maintenance</div>
-<div class="tab" onclick="window.renderTab('Monthly',this)">Monthly</div>
-<div class="tab" onclick="window.renderTab('Yearly Summary',this)">Yearly Summary</div>
 <div class="tab" onclick="window.renderTab('My Profile',this)">My Profile</div>
+<div class="tab" id="tab-users" style="display:none;border-color:#facc15;color:#facc15" onclick="window.renderTab('User Management',this)">👑 User Management</div>
 </div>
+
 <div id="content" class="card">Loading secure data...</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, getDocs, doc, setDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -55,6 +59,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const dbfs = getFirestore(app);
+// SECONDARY APP FOR CREATE USER WITHOUT LOGOUT MANAGER
+const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+const secondaryAuth = getAuth(secondaryApp);
 
 let profiles={}, payments=[], maint=[];
 let s = JSON.parse(localStorage.getItem("ozzie_session")||"null");
@@ -66,6 +73,41 @@ async function loadAll(){
   payments=[]; snapPay.forEach(d=>payments.push({id:d.id,...d.data()}));
   const snapM = await getDocs(collection(dbfs,"maintenance"));
   maint=[]; snapM.forEach(d=>maint.push({id:d.id,...d.data()}));
+}
+
+// CREATE USER BY MANAGER
+window.createResidentUser = async ()=>{
+  const room = document.getElementById('new-room').value.trim().toLowerCase();
+  const pass = document.getElementById('new-pass').value.trim();
+  const name = document.getElementById('new-name').value.trim();
+  if(!room ||!pass){ alert("Isi Room dan Password"); return; }
+  if(pass.length < 6){ alert("Password minimal 6 karakter"); return; }
+  const email = `${room}@ozziekost.web.id`;
+  try{
+    document.getElementById('btn-create').disabled=true;
+    document.getElementById('btn-create').innerText="Creating...";
+    await createUserWithEmailAndPassword(secondaryAuth, email, pass);
+    // create profile doc
+    await setDoc(doc(dbfs,"profiles",room), {
+      name: name||room.toUpperCase(),
+      room: room,
+      status: "active",
+      moveIn: new Date().toISOString().slice(0,10),
+      nextDue: "",
+      phone: "",
+      createdBy: s.email,
+      createdAt: new Date().toISOString()
+    }, {merge:true});
+    alert(`✅ Sukses! User ${room} dibuat\nEmail: ${email}\nPassword: ${pass}\n\nPenghuni bisa login pakai username: ${room}`);
+    document.getElementById('new-room').value=""; document.getElementById('new-pass').value=""; document.getElementById('new-name').value="";
+    await loadAll(); window.renderTab("All Profiles", document.getElementById('tab-all'));
+  }catch(err){
+    if(err.code==='auth/email-already-in-use') alert(`User ${room} sudah ada! Kalau mau ganti password, hapus dulu di Firebase Console > Authentication > Users > Delete ${email}, lalu create lagi disini.`);
+    else alert("Gagal: "+err.message);
+  }finally{
+    document.getElementById('btn-create').disabled=false;
+    document.getElementById('btn-create').innerText="CREATE USER";
+  }
 }
 
 window.saveMyProfile = async ()=>{
@@ -91,34 +133,43 @@ window.renderTab = function(name, el){
 
   if(name==="All Profiles"){
     let h=`<h3 style="color:#facc15">All Profiles - ${Object.keys(profiles).length} rooms</h3>`;
+    if(isManager) h+=`<div class="alert">Manager bisa lihat semua kamar. Untuk buat user baru, buka tab 👑 User Management</div>`;
     h+=`<div style="overflow-x:auto"><table><tr><th>Room</th><th>Name</th><th>Phone</th><th>Move-in</th><th>Next Due</th><th>Status</th></tr>`;
     const keys=Object.keys(profiles).sort();
-    if(keys.length===0) h+=`<tr><td colspan=6 style="color:#666;padding:20px;text-align:center">Belum ada data. Silakan tambah penghuni baru di Firebase Auth lalu isi via My Profile.<br><br>Contoh: buat user a01@ozziekost.web.id</td></tr>`;
+    if(keys.length===0) h+=`<tr><td colspan=6 style="color:#666;padding:20px;text-align:center">Belum ada data.<br>Manager: buka tab User Management untuk buat a01, a02, a03</td></tr>`;
     else keys.forEach(r=>{ const p=profiles[r]; h+=`<tr><td><b>${r.toUpperCase()}</b></td><td>${p.name||'-'}</td><td>${p.phone||'-'}</td><td>${p.moveIn||'-'}</td><td>${p.nextDue||'-'}</td><td><span class="badge" style="background:${p.status==='active'?'#14532d':'#333'}">${p.status||'active'}</span></td></tr>`; });
     h+=`</table></div>`; c.innerHTML=h;
 
-  } else if(name==="Finance & Payments"){
-    let h=`<h3 style="color:#facc15">Finance & Payments - ${payments.length} records</h3>`;
-    h+=`<div class="grid" style="margin-top:12px"><input id="pay-room" placeholder="Room (a01)"><input id="pay-amount" type="number" placeholder="Amount Rp"><input id="pay-date" type="date"><select id="pay-status"><option value="pending">Pending</option><option value="paid">Paid</option></select></div><button class="btn-gold" style="margin-top:10px" onclick="window.addPayment()">+ Add Payment</button>`;
-    h+=`<table><tr><th>Date</th><th>Room</th><th>Amount</th><th>Status</th>${isManager?'<th>Action</th>':''}</tr>${payments.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(p=>`<tr><td>${p.date||''}</td><td>${p.room||''}</td><td>Rp ${(p.amount||0).toLocaleString('id-ID')}</td><td>${p.status||''}</td>${isManager?`<td><button class="btn-gold" style="padding:4px 8px;font-size:10px" onclick="window.togglePay('${p.id}','${p.status}')">Toggle</button></td>`:''}</tr>`).join('')||'<tr><td colspan=5 style="color:#666">No records</td></tr>'}</table>`;
+  } else if(name==="User Management"){
+    if(!isManager){ c.innerHTML=`<p style="color:#ff4d4d">Hanya manager</p>`; return; }
+    let h=`<h3 style="color:#facc15">👑 User Management - Buat & Reset Password Penghuni</h3>`;
+    h+=`<div class="alert">Cara kerja: Password yang kamu buat disini = password yang dipakai penghuni untuk login di ozziekost.web.id<br>Username penghuni = nama kamar (contoh: a01). Email otomatis: a01@ozziekost.web.id</div>`;
+    h+=`<div class="card" style="margin:0 0 20px 0;background:#1a1a1a"><h4 style="color:#facc15;margin-bottom:12px">+ Create New Resident</h4><div class="grid"><div><label style="font-size:11px;color:#aaa">Room (wajib)</label><input id="new-room" placeholder="contoh: a01"></div><div><label style="font-size:11px;color:#aaa">Name</label><input id="new-name" placeholder="Nama penghuni"></div><div><label style="font-size:11px;color:#aaa">Password (min 6)</label><input id="new-pass" placeholder="contoh: a01pass123"></div><div style="display:flex;align-items:end"><button id="btn-create" class="btn-gold" style="width:100%;padding:12px" onclick="window.createResidentUser()">CREATE USER</button></div></div></div>`;
+    h+=`<h4 style="color:#facc15;margin:16px 0 8px">Current Rooms in Firestore</h4><table><tr><th>Room</th><th>Name</th><th>Login Email</th><th>Reset Cara</th></tr>`;
+    const keys=Object.keys(profiles).sort();
+    if(keys.length===0) h+=`<tr><td colspan=4 style="color:#666">Belum ada penghuni</td></tr>`;
+    else keys.forEach(r=>{ const p=profiles[r]; h+=`<tr><td><b>${r.toUpperCase()}</b></td><td>${p.name||'-'}</td><td style="font-size:10px;color:#aaa">${r}@ozziekost.web.id</td><td style="font-size:10px;color:#aaa">Untuk ganti password: Firebase Console > Authentication > Users > Delete user ${r}@ozziekost.web.id > Create lagi disini dengan password baru</td></tr>`; });
+    h+=`</table><p style="margin-top:16px;font-size:11px;color:#666">Catatan: Reset password langsung dari dashboard butuh Cloud Function (level lanjut). Untuk sekarang, Manager delete dulu user lama di Firebase Console, lalu create lagi disini dengan password baru - itu cara paling cepat 1 menit.</p>`;
     c.innerHTML=h;
 
+  } else if(name==="Finance"){
+    let h=`<h3 style="color:#facc15">Finance - ${payments.length} records</h3><div class="grid" style="margin-top:12px"><input id="pay-room" placeholder="Room (a01)"><input id="pay-amount" type="number" placeholder="Amount Rp"><input id="pay-date" type="date"><select id="pay-status"><option value="pending">Pending</option><option value="paid">Paid</option></select></div><button class="btn-gold" style="margin-top:10px" onclick="window.addPayment()">+ Add Payment</button><table><tr><th>Date</th><th>Room</th><th>Amount</th><th>Status</th>${isManager?'<th>Action</th>':''}</tr>${payments.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(p=>`<tr><td>${p.date||''}</td><td>${p.room||''}</td><td>Rp ${(p.amount||0).toLocaleString('id-ID')}</td><td>${p.status||''}</td>${isManager?`<td><button class="btn-gold" style="padding:4px 8px;font-size:10px" onclick="window.togglePay('${p.id}','${p.status}')">Toggle</button></td>`:''}</tr>`).join('')||'<tr><td colspan=5 style="color:#666">No records</td></tr>'}</table>`; c.innerHTML=h;
+
   } else if(name==="Maintenance"){
-    let h=`<h3 style="color:#facc15">Maintenance Worksheet</h3><div class="grid" style="margin-top:12px"><input id="m-room" placeholder="Room"><input id="m-issue" placeholder="Issue"><input id="m-date" type="date"><select id="m-status"><option>open</option><option>in progress</option><option>done</option></select></div><button class="btn-gold" style="margin-top:10px" onclick="window.addMaint()">+ Add Issue</button>`;
-    h+=`<table><tr><th>Date</th><th>Room</th><th>Issue</th><th>Status</th></tr>${maint.map(m=>`<tr><td>${m.date||''}</td><td>${m.room||''}</td><td>${m.issue||''}</td><td>${m.status||''}</td></tr>`).join('')||'<tr><td colspan=4 style="color:#666">No records</td></tr>'}</table>`; c.innerHTML=h;
+    let h=`<h3 style="color:#facc15">Maintenance</h3><div class="grid" style="margin-top:12px"><input id="m-room" placeholder="Room"><input id="m-issue" placeholder="Issue"><input id="m-date" type="date"><select id="m-status"><option>open</option><option>in progress</option><option>done</option></select></div><button class="btn-gold" style="margin-top:10px" onclick="window.addMaint()">+ Add Issue</button><table><tr><th>Date</th><th>Room</th><th>Issue</th><th>Status</th></tr>${maint.map(m=>`<tr><td>${m.date||''}</td><td>${m.room||''}</td><td>${m.issue||''}</td><td>${m.status||''}</td></tr>`).join('')||'<tr><td colspan=4 style="color:#666">No records</td></tr>'}</table>`; c.innerHTML=h;
 
   } else if(name==="My Profile"){
     const myRoom = s.room||""; const myData = profiles[myRoom]||{};
-    c.innerHTML=`<h3 style="color:#facc15">My Profile - ${myRoom.toUpperCase()}</h3><p style="color:#666;font-size:11px;margin:6px 0 16px">Edit data kamu, akan tersimpan aman di Firebase</p><div class="grid"><div><label style="font-size:11px;color:#aaa">Room</label><input id="inp-room" value="${myRoom}"></div><div><label style="font-size:11px;color:#aaa">Name</label><input id="inp-name" value="${myData.name||''}" placeholder="Nama Lengkap"></div><div><label style="font-size:11px;color:#aaa">Phone</label><input id="inp-phone" value="${myData.phone||''}" placeholder="08xx"></div><div><label style="font-size:11px;color:#aaa">Move-in</label><input id="inp-movein" type="date" value="${myData.moveIn||''}"></div><div><label style="font-size:11px;color:#aaa">Next Due</label><input id="inp-nextdue" type="date" value="${myData.nextDue||''}"></div></div><button class="btn-gold" style="margin-top:14px;width:100%;padding:14px" onclick="window.saveMyProfile()">SAVE TO FIREBASE</button>`;
+    c.innerHTML=`<h3 style="color:#facc15">My Profile - ${myRoom.toUpperCase()}</h3><div class="grid"><div><label style="font-size:11px;color:#aaa">Room</label><input id="inp-room" value="${myRoom}"></div><div><label style="font-size:11px;color:#aaa">Name</label><input id="inp-name" value="${myData.name||''}"></div><div><label style="font-size:11px;color:#aaa">Phone</label><input id="inp-phone" value="${myData.phone||''}"></div><div><label style="font-size:11px;color:#aaa">Move-in</label><input id="inp-movein" type="date" value="${myData.moveIn||''}"></div><div><label style="font-size:11px;color:#aaa">Next Due</label><input id="inp-nextdue" type="date" value="${myData.nextDue||''}"></div></div><button class="btn-gold" style="margin-top:14px;width:100%;padding:14px" onclick="window.saveMyProfile()">SAVE TO FIREBASE</button>`;
   } else {
-    c.innerHTML=`<h3 style="color:#facc15">${name}</h3><p style="color:#666;margin-top:10px">Data: ${Object.keys(profiles).length} profiles, ${payments.length} payments, ${maint.length} maintenance. Secure di Firestore.</p>`;
+    c.innerHTML=`<h3 style="color:#facc15">${name}</h3><p style="color:#666;margin-top:10px">Data: ${Object.keys(profiles).length} profiles</p>`;
   }
 }
 
 window.addPayment = async ()=>{
   const r=document.getElementById('pay-room').value.trim().toLowerCase(); const a=document.getElementById('pay-amount').value; const d=document.getElementById('pay-date').value; const st=document.getElementById('pay-status').value;
   if(!r||!a) return alert("Isi room & amount");
-  await addDoc(collection(dbfs,"payments"),{room:r,amount:parseInt(a),date:d||new Date().toISOString().slice(0,10),status:st,createdBy:s.email}); await loadAll(); window.renderTab("Finance & Payments",null);
+  await addDoc(collection(dbfs,"payments"),{room:r,amount:parseInt(a),date:d||new Date().toISOString().slice(0,10),status:st,createdBy:s.email}); await loadAll(); window.renderTab("Finance",null);
 }
 window.addMaint = async ()=>{
   const r=document.getElementById('m-room').value.trim().toLowerCase(); const iss=document.getElementById('m-issue').value.trim(); const d=document.getElementById('m-date').value; const st=document.getElementById('m-status').value;
@@ -126,8 +177,7 @@ window.addMaint = async ()=>{
   await addDoc(collection(dbfs,"maintenance"),{room:r,issue:iss,date:d||new Date().toISOString().slice(0,10),status:st,createdBy:s.email}); await loadAll(); window.renderTab("Maintenance",null);
 }
 window.togglePay = async (id,cur)=>{
-  const ns = cur==='paid'?'pending':'paid';
-  await updateDoc(doc(dbfs,"payments",id),{status:ns}); await loadAll(); window.renderTab("Finance & Payments",null);
+  await updateDoc(doc(dbfs,"payments",id),{status:cur==='paid'?'pending':'paid'}); await loadAll(); window.renderTab("Finance",null);
 }
 
 onAuthStateChanged(auth, async (user)=>{
@@ -137,8 +187,9 @@ onAuthStateChanged(auth, async (user)=>{
     localStorage.setItem('ozzie_session', JSON.stringify(s));
   }
   document.getElementById('welcome').innerHTML=`Welcome <b style="color:#facc15">${s.user}</b> | Role: <b style="color:#facc15">${s.role.toUpperCase()}</b> <span style="color:#666;font-size:10px">(${s.email})</span>`;
+  if(s.role==='manager') document.getElementById('tab-users').style.display='block';
   try{ await loadAll(); window.renderTab("All Profiles", document.getElementById('tab-all')); }
-  catch(err){ document.getElementById('content').innerHTML=`<div style="color:#ff4d4d"><h3>Gagal load</h3><p>${err.message}</p><p style="margin-top:8px">Publish Firestore Rules dulu.</p></div>`; }
+  catch(err){ document.getElementById('content').innerHTML=`<div style="color:#ff4d4d">Gagal load: ${err.message}<br>Publish Firestore Rules dulu</div>`; }
 });
 
 window.logout = async ()=>{ await signOut(auth); localStorage.removeItem('ozzie_session'); location.href='index.html'; }
